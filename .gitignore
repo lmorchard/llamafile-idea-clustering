@@ -1,0 +1,3 @@
+*.llamafile
+*.log
+node_modules

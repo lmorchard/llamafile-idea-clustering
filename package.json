@@ -1,0 +1,23 @@
+{
+  "name": "llamafile-idea-clustering",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "scripts": {
+    "start": "npm-run-all --parallel start:*",
+    "start:ui-dev": "nodemon --ignore public/ ./server.js",
+    "start:llamafile": "./TinyLlama-1.1B-Chat-v1.0.Q4_0.llamafile -ngl 9999 --embedding --server --nobrowser --port 8887",
+    "setup": "npm-run-all setup:*",
+    "setup:llamafile": "curl -LO https://huggingface.co/jartine/TinyLlama-1.1B-Chat-v1.0-GGUF/resolve/main/TinyLlama-1.1B-Chat-v1.0.Q4_0.llamafile?download=true"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "connect-livereload": "^0.6.1",
+    "express": "^4.19.2",
+    "http-proxy-middleware": "^3.0.0",
+    "livereload": "^0.9.3",
+    "nodemon": "^3.1.0",
+    "npm-run-all": "^4.1.5"
+  }
+}
