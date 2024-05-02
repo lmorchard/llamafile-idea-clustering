@@ -1,3 +1,5 @@
 *.llamafile
+*.llamafile.exe
 *.log
 node_modules
+.vscode

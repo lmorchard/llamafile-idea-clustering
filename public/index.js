@@ -12,11 +12,12 @@ ${user}</s>
 const SYSTEM_PROMPT = "You are a helpful but terse assistant.";
 
 const USER_PROMPT = (items) => `
-I need a succinct label that effectively encapsulates the overall theme or purpose for the following list of items:
+Please generate a succinct label that effectively encapsulates the overall theme or purpose for the following list of items:
 
 ${items.join("\n")}
 
-Please generate a concise, descriptive label for this list. Thanks in advance!`;
+Please generate a concise, descriptive label for this list. Thanks in advance!
+`;
 
 const items = `
 - pasta
@@ -56,26 +57,22 @@ const items = `
   .filter((x) => !!x);
 
 async function main() {
-  console.log("READY");
+  console.log("READY.");
 
   const props = await llamafileGET("props");
-  console.log(props);
+
+  const meta_el = document.getElementById("meta");
+  meta_el.innerHTML = JSON.stringify(props, null, "  ");
 
   const embeddingsResponse = await llamafile("embedding", { content: items });
   const embeddings = embeddingsResponse.results.map(r => r.embedding);
-  console.log(embeddings);
 
-  const clusteringResult = skmeans(embeddings, 12);
-  const clusters = [];
-  for (let i = 0; i < clusteringResult.centroids.length; i++) {
-    const cluster = [];
-    for (let j = 0; j < clusteringResult.idxs.length; j++) {
-      if (clusteringResult.idxs[j] === i) {
-        cluster.push(items[j]);
-      }
-    }
-    clusters.push(cluster);
-  }
+  const { centroids, idxs } = skmeans(embeddings, 12);
+  const clusters = centroids.map((_centroid, currIdx) =>
+    idxs
+      .map((idx, itemIdx) => idx === currIdx && items[itemIdx])
+      .filter(x => !!x)
+  );
   console.log(clusters);
 
   const app_el = document.getElementById("app");
@@ -99,8 +96,6 @@ async function main() {
     app_el.innerHTML += `</ul>`;
   }
 
-  /*
-  */
 }
 
 async function llamafile(path, payload, method = "POST") {
