@@ -117,7 +117,7 @@ class StickyNote extends BaseElement {
 }
 customElements.define("sticky-note", StickyNote);
 
-class NotesCanvas extends BaseElement {
+class StickyNotesCanvas extends BaseElement {
   static observedAttributes = ["zoom", "min-zoom", "max-zoom", "wheel-factor"];
 
   static templateSource = html`
@@ -201,6 +201,6 @@ class NotesCanvas extends BaseElement {
     `;
   }
 }
-customElements.define("notes-canvas", NotesCanvas);
+customElements.define("sticky-notes-canvas", StickyNotesCanvas);
 
 window.addEventListener("DOMContentLoaded", () => main().catch(console.error));
