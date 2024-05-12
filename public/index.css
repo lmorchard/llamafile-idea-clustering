@@ -1,2 +1,6 @@
-notes-canvas {
+sticky-notes-canvas {
+  box-sizing: border-box;
+  width: 80vw;
+  height: 80vh;
+  border: 8px solid black;
 }

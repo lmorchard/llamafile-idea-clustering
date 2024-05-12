@@ -6,26 +6,102 @@ const html = (strings, ...values) =>
   strings.map((string, i) => string + (values[i] || "")).join("");
 
 class BaseElement extends HTMLElement {
-  static templateSource = html`<slot></slot>`;
+  static template = html`<slot></slot>`;
 
   constructor() {
     super();
-    const template = this.getTemplate();
+    const template = this.template();
     const shadowRoot = this.attachShadow({ mode: "open" });
     shadowRoot.appendChild(template.cloneNode(true));
   }
 
-  getTemplate() {
+  template() {
     const template = this.ownerDocument.createElement("template");
-    template.innerHTML = this.constructor.templateSource;
+    template.innerHTML = this.constructor.template;
     return template.content.cloneNode(true);
   }
+
+  connectedCallback() {
+    this.scheduleUpdate();
+  }
+
+  attributeChangedCallback(name, oldValue, newValue) {
+    if (oldValue !== newValue) {
+      this.scheduleUpdate();
+    }
+  }
+
+  getObservedAttributes() {
+    const attrs = {};
+    for (const name of this.constructor.observedAttributes) {
+      attrs[name] = this.getAttribute(name);
+    }
+    return attrs;
+  }
+
+  scheduleUpdate() {
+    if (this._updateScheduled) return;
+    this._updateScheduled = true;
+    window.requestAnimationFrame(() => {
+      this.update();
+      this._updateScheduled = false;
+    });
+  }
+
+  update() {}
 }
 
-class StickyNote extends BaseElement {
+const DraggableMixin = (Base) =>
+  class extends Base {
+    constructor() {
+      super();
+    }
+
+    connectedCallback() {
+      super.connectedCallback();
+      this.addEventListener("mousedown", this.onMouseDown);
+    }
+
+    getZoom() {
+      return parseFloat(this.attributes.zoom.value);
+    }
+
+    getDragStartPosition() {
+      return {
+        x: parseInt(this.attributes.x.value),
+        y: parseInt(this.attributes.y.value),
+      };
+    }
+
+    onMouseDown(ev) {
+      const startPosition = this.getDragStartPosition();
+      const dragStart = { x: ev.clientX, y: ev.clientY };
+
+      const onMouseMove = (ev) => {
+        const zoom = this.getZoom();
+        const dx = (ev.clientX - dragStart.x) / zoom;
+        const dy = (ev.clientY - dragStart.y) / zoom;
+        this.onDragged(startPosition.x, startPosition.y, dx, dy);
+      };
+      document.addEventListener("mousemove", onMouseMove);
+
+      const onMouseUp = () => {
+        document.removeEventListener("mousemove", onMouseMove);
+        document.removeEventListener("mouseup", onMouseUp);
+      };
+      document.addEventListener("mouseup", onMouseUp);
+
+      ev.preventDefault();
+      ev.stopPropagation();
+    }
+
+    onDragged(sx, sy, dx, dy) {}
+  };
+
+class StickyNote extends DraggableMixin(BaseElement) {
   static observedAttributes = ["x", "y", "width", "height", "color"];
 
-  static templateSource = html`
+  static template = html`
     <style>
       :host {
         position: absolute;
@@ -45,91 +121,48 @@ class StickyNote extends BaseElement {
     </div>
   `;
 
-  constructor() {
-    super();
-
-    this.dragging = false;
-  }
-
-  connectedCallback() {
-    this.updateStyles();
-
-    this.addEventListener("mousedown", this.onMouseDown);
-  }
-
-  get zoom() {
+  getZoom() {
     return parseFloat(this.parentElement.attributes.zoom.value);
   }
 
-  onMouseDown(ev) {
-    this.dragStart = { x: ev.clientX, y: ev.clientY };
-    this.startPos = {
+  getDragStartPosition() {
+    return {
       x: parseInt(this.attributes.x.value),
       y: parseInt(this.attributes.y.value),
     };
-
-    const onMouseMove = (ev) => {
-      const zoom = this.zoom;
-      const dx = (ev.clientX - this.dragStart.x) / zoom;
-      const dy = (ev.clientY - this.dragStart.y) / zoom;
-      const newX = this.startPos.x + dx;
-      const newY = this.startPos.y + dy;
-      this.attributes.x.value = newX;
-      this.attributes.y.value = newY;
-    };
-    document.addEventListener("mousemove", onMouseMove);
-
-    const onMouseUp = () => {
-      document.removeEventListener("mousemove", onMouseMove);
-      document.removeEventListener("mouseup", onMouseUp);
-    };
-    document.addEventListener("mouseup", onMouseUp);
-
-    ev.preventDefault();
-    ev.stopPropagation();
   }
 
-  attributeChangedCallback(name, oldValue, newValue) {
-    if (oldValue !== newValue) {
-      this.updateStyles();
-    }
+  onDragged(sx, sy, dx, dy) {
+    this.attributes.x.value = sx + dx;
+    this.attributes.y.value = sy + dy;
   }
 
-  getProps() {
-    const props = {};
-    for (const name of this.constructor.observedAttributes) {
-      props[name] = this.getAttribute(name);
-    }
-    return props;
-  }
+  update() {
+    const props = this.getObservedAttributes();
 
-  updateStyles() {
-    window.requestAnimationFrame(() => {
-      const props = this.getProps();
-
-      this.style.left = `${props.x}px`;
-      this.style.top = `${props.y}px`;
-      this.style.width = `${props.width}px`;
-      this.style.height = `${props.height}px`;
-      this.style.backgroundColor = props.color;
-    });
+    this.style.left = `${props.x}px`;
+    this.style.top = `${props.y}px`;
+    this.style.width = `${props.width}px`;
+    this.style.height = `${props.height}px`;
+    this.style.backgroundColor = props.color;
   }
 }
 customElements.define("sticky-note", StickyNote);
 
-class StickyNotesCanvas extends BaseElement {
-  static observedAttributes = ["zoom", "min-zoom", "max-zoom", "wheel-factor"];
+class StickyNotesCanvas extends DraggableMixin(BaseElement) {
+  static observedAttributes = [
+    "originX",
+    "originY",
+    "zoom",
+    "min-zoom",
+    "max-zoom",
+    "wheel-factor",
+  ];
 
-  static templateSource = html`
+  static template = html`
     <style>
       :host {
         display: block;
-        position: absolute;
-        left: 0;
-        top: 0;
-        box-sizing: border-box;
-        width: 100vw;
-        height: 100vh;
         overflow: hidden;
       }
       .container {
@@ -171,16 +204,13 @@ class StickyNotesCanvas extends BaseElement {
 
   set zoom(value) {
     this.attributes.zoom.value = value;
-    this.updateZoom();
+    this.update();
   }
 
   connectedCallback() {
+    super.connectedCallback();
     this.addEventListener("wheel", this.onWheel);
-    this.updateZoom();
-    this.addEventListener("mousemove", this.onMouseMove);
   }
-
-  onMouseMove(ev) {}
 
   onWheel(ev) {
     ev.preventDefault();
@@ -190,14 +220,30 @@ class StickyNotesCanvas extends BaseElement {
     );
   }
 
-  updateZoom() {
-    const zoom = parseFloat(this.attributes.zoom.value);
+  getDragStartPosition() {
+    return {
+      x: parseInt(this.attributes.originX.value),
+      y: parseInt(this.attributes.originY.value),
+    };
+  }
 
-    const container = this.shadowRoot.querySelector(".container");
+  onDragged(sx, sy, dx, dy) {
+    this.attributes.originX.value = sx - dx;
+    this.attributes.originY.value = sy - dy;
+    this.update();
+    console.log("onDragged", sx, sy, dx, dy);
+  }
+
+  update() {
+    const attrs = this.getObservedAttributes();
+    const zoom = parseFloat(attrs.zoom);
+    const originX = parseFloat(attrs.originX);
+    const originY = parseFloat(attrs.originY);
+
     const innerCanvas = this.shadowRoot.querySelector(".inner-canvas");
     innerCanvas.style.transform = `
       scale(${zoom})
-      translate(50%, 50%)
+      translate(${0 - originX}px, ${0 - originY}px)
     `;
   }
 }
