@@ -62,17 +62,6 @@ const DraggableMixin = (Base) =>
       this.addEventListener("mousedown", this.onMouseDown);
     }
 
-    getZoom() {
-      return parseFloat(this.attributes.zoom.value);
-    }
-
-    getDragStartPosition() {
-      return {
-        x: parseInt(this.attributes.x.value),
-        y: parseInt(this.attributes.y.value),
-      };
-    }
-
     onMouseDown(ev) {
       const startPosition = this.getDragStartPosition();
       const dragStart = { x: ev.clientX, y: ev.clientY };
@@ -93,6 +82,14 @@ const DraggableMixin = (Base) =>
 
       ev.preventDefault();
       ev.stopPropagation();
+    }
+
+    getZoom() {
+      return 1.0;
+    }
+
+    getDragStartPosition() {
+      return { x: 0, y: 0 };
     }
 
     onDragged(sx, sy, dx, dy) {}
@@ -138,25 +135,25 @@ class StickyNote extends DraggableMixin(BaseElement) {
   }
 
   update() {
-    const props = this.getObservedAttributes();
+    const attrs = this.getObservedAttributes();
 
-    this.style.left = `${props.x}px`;
-    this.style.top = `${props.y}px`;
-    this.style.width = `${props.width}px`;
-    this.style.height = `${props.height}px`;
-    this.style.backgroundColor = props.color;
+    this.style.left = `${attrs.x}px`;
+    this.style.top = `${attrs.y}px`;
+    this.style.width = `${attrs.width}px`;
+    this.style.height = `${attrs.height}px`;
+    this.style.backgroundColor = attrs.color;
   }
 }
 customElements.define("sticky-note", StickyNote);
 
 class StickyNotesCanvas extends DraggableMixin(BaseElement) {
   static observedAttributes = [
-    "originX",
-    "originY",
+    "originx",
+    "originy",
     "zoom",
-    "min-zoom",
-    "max-zoom",
-    "wheel-factor",
+    "minzoom",
+    "maxzoom",
+    "wheelfactor",
   ];
 
   static template = html`
@@ -178,7 +175,6 @@ class StickyNotesCanvas extends DraggableMixin(BaseElement) {
         height: 100vh;
         padding: 0;
         margin: 0;
-        transform: translate(50%, 50%);
       }
     </style>
 
@@ -191,8 +187,6 @@ class StickyNotesCanvas extends DraggableMixin(BaseElement) {
 
   constructor() {
     super();
-
-    this.document = null;
     this.minZoom = 0.1;
     this.maxZoom = 5.0;
     this.wheelFactor = 0.001;
@@ -220,25 +214,27 @@ class StickyNotesCanvas extends DraggableMixin(BaseElement) {
     );
   }
 
+  getZoom() {
+    return parseFloat(this.attributes.zoom.value);
+  }
+
   getDragStartPosition() {
     return {
-      x: parseInt(this.attributes.originX.value),
-      y: parseInt(this.attributes.originY.value),
+      x: parseInt(this.attributes.originx.value),
+      y: parseInt(this.attributes.originy.value),
     };
   }
 
   onDragged(sx, sy, dx, dy) {
-    this.attributes.originX.value = sx - dx;
-    this.attributes.originY.value = sy - dy;
-    this.update();
-    console.log("onDragged", sx, sy, dx, dy);
+    this.attributes.originx.value = sx - dx;
+    this.attributes.originy.value = sy - dy;
   }
 
   update() {
     const attrs = this.getObservedAttributes();
     const zoom = parseFloat(attrs.zoom);
-    const originX = parseFloat(attrs.originX);
-    const originY = parseFloat(attrs.originY);
+    const originX = parseFloat(attrs.originx);
+    const originY = parseFloat(attrs.originy);
 
     const innerCanvas = this.shadowRoot.querySelector(".inner-canvas");
     innerCanvas.style.transform = `
