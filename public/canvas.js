@@ -214,7 +214,6 @@ class StickyNotesCanvas extends DraggableMixin(BaseElement) {
 
   onWheel(ev) {
     ev.preventDefault();
-    console.log(ev);
     this.zoomOrigin = { x: ev.clientX, y: ev.clientY };
     this.zoom = Math.min(
       this.maxZoom,
