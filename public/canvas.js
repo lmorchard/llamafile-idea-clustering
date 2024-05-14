@@ -166,7 +166,11 @@ class StickyNotesCanvas extends DraggableMixin(BaseElement) {
         position: relative;
         top: 0;
         left: 0;
+
+        width: 100%;
+        height: 100%;
       }
+      /*
       .inner-canvas {
         position: absolute;
         top: 0;
@@ -176,6 +180,7 @@ class StickyNotesCanvas extends DraggableMixin(BaseElement) {
         padding: 0;
         margin: 0;
       }
+      */
     </style>
 
     <div class="container">
@@ -190,6 +195,7 @@ class StickyNotesCanvas extends DraggableMixin(BaseElement) {
     this.minZoom = 0.1;
     this.maxZoom = 5.0;
     this.wheelFactor = 0.001;
+    this.zoomOrigin = { x: 0, y: 0 };
   }
 
   get zoom() {
@@ -208,6 +214,8 @@ class StickyNotesCanvas extends DraggableMixin(BaseElement) {
 
   onWheel(ev) {
     ev.preventDefault();
+    console.log(ev);
+    this.zoomOrigin = { x: ev.clientX, y: ev.clientY };
     this.zoom = Math.min(
       this.maxZoom,
       Math.max(this.minZoom, this.zoom + ev.deltaY * this.wheelFactor)
@@ -236,10 +244,24 @@ class StickyNotesCanvas extends DraggableMixin(BaseElement) {
     const originX = parseFloat(attrs.originx);
     const originY = parseFloat(attrs.originy);
 
+    const parentEl = this;
+    const container = this.shadowRoot.querySelector(".container");
     const innerCanvas = this.shadowRoot.querySelector(".inner-canvas");
-    innerCanvas.style.transform = `
+
+    const parentHalfWidth = parentEl.clientWidth / 2;
+    const parentHalfHeight = parentEl.clientHeight / 2;
+
+    const translateX = parentHalfWidth - originX;
+    const translateY = parentHalfHeight - originY;
+
+    container.style.transformOrigin = `${parentHalfWidth}px ${parentHalfHeight}px`;
+
+    container.style.transform = `
       scale(${zoom})
-      translate(${0 - originX}px, ${0 - originY}px)
+      translate(${translateX}px, ${translateY}px)
+    `;
+
+    innerCanvas.style.transform = `
     `;
   }
 }
