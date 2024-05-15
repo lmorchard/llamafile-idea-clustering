@@ -1,5 +1,6 @@
-import { $, $$, updateElement } from "./lib/dom.js";
+import { $, $$, updateElement, createElement } from "./lib/dom.js";
 import "./lib/components/index.js";
+import Springy from "./lib/springy.js";
 import { items } from "./items.js";
 
 async function main() {
@@ -32,19 +33,18 @@ async function main() {
   const minY = -400;
   const maxY = 400;
 
-  for (let idx = 0; idx < items.length; idx++) {
-    const item = items[idx];
-    const note = document.createElement("sticky-note");
-
-    note.updateElement({
-      "@id": `note-${idx}`,
-      "@x": Math.random() * (maxX - minX) + minX,
-      "@y": Math.random() * (maxY - minY) + minY,
-      "@color": colors[Math.floor(Math.random() * colors.length)],
-      innerHTML: item.substring(2),
-    });
-
-    notesCanvas.appendChild(note);
+  if (false) {
+    for (let idx = 0; idx < items.length; idx++) {
+      const item = items[idx];
+      const note = createElement("sticky-note", {
+        "id": `note-${idx}`,
+        "x": Math.random() * (maxX - minX) + minX,
+        "y": Math.random() * (maxY - minY) + minY,
+        "color": colors[Math.floor(Math.random() * colors.length)],
+        ".innerHTML": item.substring(2),
+      });
+      notesCanvas.appendChild(note);
+    }
   }
 }
 

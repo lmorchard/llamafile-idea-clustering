@@ -1,9 +1,10 @@
 import { BaseElement } from "../dom.js";
 import { DraggableMixin } from "./DraggableMixin.js";
 import { PositionableMixin } from "./PositionableMixin.js";
+import { SizeableMixin } from "./SizeableMixin.js";
 
 export const StickyNotesCanvasChildDraggableMixin = (Base = BaseElement) =>
-  class extends DraggableMixin(PositionableMixin(Base)) {
+  class extends DraggableMixin(PositionableMixin(SizeableMixin(Base))) {
     get zoom() {
       const parentCanvas = this.closest("sticky-notes-canvas");
       return parentCanvas ? parseFloat(parentCanvas.zoom) : 1;
@@ -24,4 +25,5 @@ export const StickyNotesCanvasChildDraggableMixin = (Base = BaseElement) =>
 
 StickyNotesCanvasChildDraggableMixin.observedAttributes = [
   ...PositionableMixin.observedAttributes,
+  ...SizeableMixin.observedAttributes,
 ];

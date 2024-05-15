@@ -1,7 +1,7 @@
-import { html } from "../dom.js";
+import { html, BaseElement } from "../dom.js";
 import { StickyNotesCanvasChildDraggableMixin } from "../mixins/StickyNotesCanvasChildDraggableMixin.js";
 
-export class StickyNote extends StickyNotesCanvasChildDraggableMixin() {
+export class StickyNotesClusterTopic extends StickyNotesCanvasChildDraggableMixin() {
   static observedAttributes = [
     ...StickyNotesCanvasChildDraggableMixin.observedAttributes,
     "color",
@@ -19,12 +19,13 @@ export class StickyNote extends StickyNotesCanvasChildDraggableMixin() {
         align-items: center;
         border: 1px solid black;
         box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.5);
+        z-index: -100;
       }
       :host .container {
       }
     </style>
     <div class="container">
-      <slot></slot>
+      <span class="title"></span>
     </div>
   `;
 
@@ -32,7 +33,21 @@ export class StickyNote extends StickyNotesCanvasChildDraggableMixin() {
     super.update();
 
     this.style.backgroundColor = this.attributes.color.value;
+    this.$(".title").innerText = this.getAttribute("title");
   }
 }
 
-customElements.define("sticky-note", StickyNote);
+customElements.define("sticky-notes-cluster-topic", StickyNotesClusterTopic);
+
+export class StickyNotesClusterLink extends BaseElement {
+  static observedAttributes = ["id", "href"];
+  static template = html`
+    <style>
+      :host {
+        visibility: hidden;
+      }
+    </style>
+  `;
+}
+
+customElements.define("sticky-notes-cluster-link", StickyNotesClusterLink);

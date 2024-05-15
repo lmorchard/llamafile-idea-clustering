@@ -5,18 +5,22 @@
     <script type="module" src="./canvas.js"></script>
   </head>
   <body>
-    <sticky-notes-canvas id="notes-canvas" zoom="1.0" originX="0" originY="0">
-      <sticky-notes-group title="Group 1" x="0" y="0" width="200" height="200" color="#888">
-        <sticky-note x="-200" y="-200" width="100" height="100" color="#a8a">
-          Note 1
-        </sticky-note>
-        <sticky-note x="0" y="0" width="100" height="100" color="#aa8">
-          Note 2
-        </sticky-note>
-        <sticky-note x="200" y="200" width="100" height="100" color="#8aa">
-          Note 3
-        </sticky-note>
-      </sticky-notes-group>
+    <sticky-notes-canvas id="notes-canvas" zoom="1.0" originX="100" originY="100">
+      <sticky-note id="example-1" x="-200" y="-200" width="100" height="100" color="#a8a">
+        Note 1
+      </sticky-note>
+      <sticky-note id="example-2" x="-200" y="200" width="100" height="100" color="#aa8">
+        Note 2
+      </sticky-note>
+      <sticky-note id="example-3" x="200" y="200" width="100" height="100" color="#8aa">
+        Note 3
+      </sticky-note>
+
+      <sticky-notes-cluster-topic id="topic-1" title="topic 1" x="0" y="0" color="#999">
+        <sticky-notes-cluster-link href="example-1" />
+        <sticky-notes-cluster-link href="example-2" />
+        <sticky-notes-cluster-link href="example-3" />
+      </sticky-notes-cluster-topic>
     </sticky-notes-canvas>
   </body>
 </html>

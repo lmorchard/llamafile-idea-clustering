@@ -3,7 +3,7 @@ import { items } from "./items.js";
 import "./skmeans.js";
 
 import "./lib/components/index.js";
-import { $, $$, updateElement } from "./lib/dom.js";
+import { $, $$, updateElement, createElement } from "./lib/dom.js";
 
 const LLAMAFILE_BASE_URL = "http://127.0.0.1:8886";
 
@@ -23,13 +23,31 @@ const USER_PROMPT = (items) => `
   Please generate a concise, descriptive label for this list. Thanks in advance!
   `;
 
+const CLUSTER_LAYOUT_RADIUS = 1250;
+
 async function main() {
   console.log("READY.");
 
-  const notesCanvas = document.getElementById("notes-canvas");
-
   const props = await llamafileGET("props");
   console.log(`Model: ${props.default_generation_settings.model}`);
+
+  const canvasEl = document.getElementById("notes-canvas");
+  const itemsWithIds = items.map((item, idx) => ({
+    id: `item-${idx + 1}`,
+    item,
+  }));
+
+  for (const item of itemsWithIds) {
+    canvasEl.appendChild(
+      createElement("sticky-note", {
+        id: item.id,
+        x: Math.random() * 300 - 150,
+        y: Math.random() * 300 - 150,
+        color: `#${Math.floor(Math.random() * 16777215).toString(16)}`,
+        ".innerHTML": item.item.substring(2),
+      })
+    );
+  }
 
   const embeddingsResponse = await llamafile("embedding", { content: items });
   const embeddings = embeddingsResponse.results.map((r) => r.embedding);
@@ -37,12 +55,9 @@ async function main() {
   const { centroids, idxs } = skmeans(embeddings, 12);
   const clusters = centroids.map((_centroid, currIdx) =>
     idxs
-      .map((idx, itemIdx) => idx === currIdx && items[itemIdx])
+      .map((idx, itemIdx) => idx === currIdx && itemsWithIds[itemIdx])
       .filter((x) => !!x)
   );
-  console.log(clusters);
-
-  const canvasEl = document.getElementById("notes-canvas");
 
   for (let i = 0; i < clusters.length; i++) {
     const cluster = clusters[i];
@@ -52,29 +67,24 @@ async function main() {
       prompt,
       n_predict: 16,
     });
-    console.log(result);
 
-    const clusterGroupEl = document.createElement("sticky-notes-group");
-    clusterGroupEl.updateElement({
-      "@id": `cluster-${i}`,
-      "@x": Math.random() * 500 - 250,
-      "@y": Math.random() * 500 - 250,
-      "@title": `${result.content}`,
-      "@color": `#${Math.floor(Math.random() * 16777215).toString(16)}`,
+    const clusterAngle = (i / clusters.length) * Math.PI * 2;
+    const clusterX = Math.cos(clusterAngle) * CLUSTER_LAYOUT_RADIUS;
+    const clusterY = Math.sin(clusterAngle) * CLUSTER_LAYOUT_RADIUS;
+
+    const clusterGroupEl = createElement("sticky-notes-cluster-topic", {
+      id: `cluster-${i}`,
+      x: clusterX,
+      y: clusterY,
+      title: `${result.content}`,
+      color: `#999`,
+      children: cluster.map((item) =>
+        createElement("sticky-notes-cluster-link", {
+          href: `${item.id}`,
+        })
+      ),
     });
     canvasEl.appendChild(clusterGroupEl);
-
-    for (let j = 0; j < cluster.length; j++) {
-      const noteEl = document.createElement("sticky-note");
-      noteEl.updateElement({
-        "@id": `note-${j}`,
-        "@x": Math.random() * 200 - 100,
-        "@y": Math.random() * 200 - 100,
-        "@color": `#${Math.floor(Math.random() * 16777215).toString(16)}`,
-        innerHTML: cluster[j].substring(2),
-      });
-      clusterGroupEl.appendChild(noteEl);
-    }
   }
 }
 

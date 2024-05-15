@@ -5,12 +5,15 @@ export const DraggableMixin = (Base) => class extends Base {
 
   connectedCallback() {
     super.connectedCallback();
+
+    this.dragging = false;
     this.addEventListener("mousedown", this.onMouseDown);
   }
 
   onMouseDown(ev) {
     const startPosition = this.getDragStartPosition();
     const dragStart = { x: ev.clientX, y: ev.clientY };
+    this.dragging = true;
 
     const onMouseMove = (ev) => {
       const zoom = this.zoom;
@@ -21,6 +24,7 @@ export const DraggableMixin = (Base) => class extends Base {
     document.addEventListener("mousemove", onMouseMove);
 
     const onMouseUp = () => {
+      this.dragging = false;
       document.removeEventListener("mousemove", onMouseMove);
       document.removeEventListener("mouseup", onMouseUp);
     };

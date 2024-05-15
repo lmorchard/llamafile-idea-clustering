@@ -1,5 +1,3 @@
-// subset copypasta'd from https://github.com/lmorchard/lmorchard-scenes/blob/6e60f3ddf45f8988e5225c6bb772265130991a03/web_modules/dom.js
-
 export const $ = (sel, context = document.body) =>
   typeof sel === "string" ? context.querySelector(sel) : sel;
 
@@ -9,43 +7,54 @@ export const $$ = (sel, context = document) =>
 export const html = (strings, ...values) =>
   strings.map((string, i) => string + (values[i] || "")).join("");
 
-export function updateElement(el, changeSet) {
-  if (typeof changeSet === "string") {
-    el.textContent = changeSet;
-  } else if (typeof changeSet === "function") {
-    changeSet(el);
+export function clearChildren(sel, context = document.body) {
+  let parentNode = $(sel, context);
+  while (parentNode.firstChild) {
+    parentNode.removeChild(parentNode.firstChild);
+  }
+  return parentNode;
+}
+
+export function replaceChildren(sel, childNodes, context = document.body) {
+  let parentNode = clearChildren(sel, context);
+  for (let node of childNodes) {
+    parentNode.appendChild(node);
+  }
+  return parentNode;
+}
+
+export function updateElement(el, elementUpdateSet) {
+  if (typeof elementUpdateSet === "string") {
+    el.textContent = elementUpdateSet;
+  } else if (typeof elementUpdateSet === "function") {
+    elementUpdateSet(el);
   } else {
-    for (const name in changeSet) {
-      const value = changeSet[name];
-      if (name.startsWith("@")) {
-        el.setAttribute(name.substring(1), value);
-      } else if (name.startsWith(">")) {
+    for (let [name, value] of Object.entries(elementUpdateSet)) {
+      if (name.startsWith(">")) {
         el.addEventListener(name.substring(1), value);
+      } else if (name.startsWith(".")) {
+        el[name.substring(1)] = value;
       } else if (name === "children") {
         replaceChildren(el, value);
       } else {
-        el[name] = value;
+        el.setAttribute(name, value);
       }
     }
   }
   return el;
 }
 
-export function updateElements(changes = [], context = document.body) {
-  for (const sel in changes) {
-    for (const el of $$(sel, context)) {
-      updateElement(el, changes[sel]);
-    }
-  }
+export function createElement(name, changeSet = {}, context = document) {
+  return updateElement(context.createElement(name), changeSet);
 }
+
 export class BaseElement extends HTMLElement {
   static template = html`<slot></slot>`;
 
   constructor() {
     super();
-    const template = this.template();
     const shadowRoot = this.attachShadow({ mode: "open" });
-    shadowRoot.appendChild(template.cloneNode(true));
+    shadowRoot.appendChild(this.template());
   }
 
   template() {
@@ -80,12 +89,13 @@ export class BaseElement extends HTMLElement {
     return $$(sel, this.shadowRoot);
   }
 
-  updateElement(changeSet) {
-    updateElement(this, changeSet);
-  }
-
-  updateShadowRoot(changeSet) {
-    updateElements(this.shadowRoot, changeSet);
+  applyUpdates(selectorUpdateSet) {
+    for (const sel in selectorUpdateSet) {
+      const els = sel === ":host" ? [this] : $$(sel, this.shadowRoot);
+      for (const el of els) {
+        updateElement(el, selectorUpdateSet[sel]);
+      }
+    }
   }
 
   scheduleUpdate() {
