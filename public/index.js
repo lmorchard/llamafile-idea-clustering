@@ -1,61 +1,24 @@
 import { llama } from "./completion.js";
+import { items } from "./items.js";
 import "./skmeans.js";
 
-const items = `
-- pasta
-- thomas dolby
-- alpha
-- apples
-- cats
-- pears
-- meters
-- brick
-- dogs
-- beta
-- howard jones
-- concrete
-- asphalt
-- milk
-- rebar
-- gillian gilbert
-- hamsters
-- bread
-- butter
-- wendy carlos
-- gamma
-- birds
-- bananas
-- rick wakeman
-- inches
-- glass
-- feet
-- gary numan
-- miles
-- lumber
-- kilometers
-- geoff downes
-`
-  .split(/\n/)
-  .filter((x) => !!x);
+const LLAMAFILE_BASE_URL = "http://127.0.0.1:8886";
 
-  const LLAMAFILE_BASE_URL = "http://127.0.0.1:8886";
-
-  const PROMPT_TEMPLATE = (system, user) => `<|system|>
+const PROMPT_TEMPLATE = (system, user) => `<|system|>
   ${system}</s>
   <|user|>
   ${user}</s>
   <|assistant|>`;
-  
-  const SYSTEM_PROMPT = "You are a helpful but terse assistant.";
-  
-  const USER_PROMPT = (items) => `
+
+const SYSTEM_PROMPT = "You are a helpful but terse assistant.";
+
+const USER_PROMPT = (items) => `
   Please generate a succinct label that effectively encapsulates the overall theme or purpose for the following list of items:
   
   ${items.join("\n")}
   
   Please generate a concise, descriptive label for this list. Thanks in advance!
   `;
-
 
 async function main() {
   console.log("READY.");
@@ -64,13 +27,13 @@ async function main() {
   console.log(`Model: ${props.default_generation_settings.model}`);
 
   const embeddingsResponse = await llamafile("embedding", { content: items });
-  const embeddings = embeddingsResponse.results.map(r => r.embedding);
+  const embeddings = embeddingsResponse.results.map((r) => r.embedding);
 
   const { centroids, idxs } = skmeans(embeddings, 12);
   const clusters = centroids.map((_centroid, currIdx) =>
     idxs
       .map((idx, itemIdx) => idx === currIdx && items[itemIdx])
-      .filter(x => !!x)
+      .filter((x) => !!x)
   );
   console.log(clusters);
 
@@ -94,7 +57,6 @@ async function main() {
     }
     app_el.innerHTML += `</ul>`;
   }
-
 }
 
 async function llamafile(path, payload, method = "POST") {
