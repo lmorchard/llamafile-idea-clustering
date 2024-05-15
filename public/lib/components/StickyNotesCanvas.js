@@ -259,7 +259,7 @@ export class StickyNotesCanvas extends DraggableMixin(BaseElement) {
       if (!el) continue;
 
       if (el.tagName === "STICKY-NOTES-CLUSTER-TOPIC") {
-        point.m = 100000;
+        point.m = 10000;
       } else {
         point.m = 1;
       }

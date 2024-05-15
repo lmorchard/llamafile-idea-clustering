@@ -62,7 +62,10 @@ async function main() {
   for (let i = 0; i < clusters.length; i++) {
     const cluster = clusters[i];
 
-    const prompt = PROMPT_TEMPLATE(SYSTEM_PROMPT, USER_PROMPT(cluster));
+    const prompt = PROMPT_TEMPLATE(
+      SYSTEM_PROMPT,
+      USER_PROMPT(cluster.map((item) => item.item))
+    );
     const result = await llamafile("completion", {
       prompt,
       n_predict: 16,
@@ -76,7 +79,9 @@ async function main() {
       id: `cluster-${i}`,
       x: clusterX,
       y: clusterY,
-      title: `${result.content}`,
+      width: 150,
+      height: 125,
+      title: `${result.content.trim()}`,
       color: `#999`,
       children: cluster.map((item) =>
         createElement("sticky-notes-cluster-link", {

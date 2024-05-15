@@ -16,17 +16,14 @@ export class StickyNotesClusterTopic extends StickyNotesCanvasChildDraggableMixi
         display: flex;
         flex-direction: column;
         justify-content: center;
+        text-align: center;
         align-items: center;
         border: 1px solid black;
         box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.5);
         z-index: -100;
       }
-      :host .container {
-      }
     </style>
-    <div class="container">
-      <span class="title"></span>
-    </div>
+    <span class="title"></span>
   `;
 
   update() {
