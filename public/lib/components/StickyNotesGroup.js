@@ -23,7 +23,7 @@ export class StickyNotesGroup extends StickyNotesCanvasChildDraggableMixin() {
     </style>
     <div class="container">
       <slot></slot>
-      <h1 class="title"></h1>
+      <span class="title"></span>
     </div>
   `;
   update() {

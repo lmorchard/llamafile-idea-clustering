@@ -2,6 +2,9 @@ import { llama } from "./completion.js";
 import { items } from "./items.js";
 import "./skmeans.js";
 
+import "./lib/components/index.js";
+import { $, $$, updateElement } from "./lib/dom.js";
+
 const LLAMAFILE_BASE_URL = "http://127.0.0.1:8886";
 
 const PROMPT_TEMPLATE = (system, user) => `<|system|>
@@ -14,14 +17,16 @@ const SYSTEM_PROMPT = "You are a helpful but terse assistant.";
 
 const USER_PROMPT = (items) => `
   Please generate a succinct label that effectively encapsulates the overall theme or purpose for the following list of items:
-  
+
   ${items.join("\n")}
-  
+
   Please generate a concise, descriptive label for this list. Thanks in advance!
   `;
 
 async function main() {
   console.log("READY.");
+
+  const notesCanvas = document.getElementById("notes-canvas");
 
   const props = await llamafileGET("props");
   console.log(`Model: ${props.default_generation_settings.model}`);
@@ -37,8 +42,7 @@ async function main() {
   );
   console.log(clusters);
 
-  const app_el = document.getElementById("app");
-  app_el.innerHTML = "";
+  const canvasEl = document.getElementById("notes-canvas");
 
   for (let i = 0; i < clusters.length; i++) {
     const cluster = clusters[i];
@@ -50,12 +54,27 @@ async function main() {
     });
     console.log(result);
 
-    app_el.innerHTML += `<h2>${result.content}</h2>`;
-    app_el.innerHTML += `<ul>`;
+    const clusterGroupEl = document.createElement("sticky-notes-group");
+    clusterGroupEl.updateElement({
+      "@id": `cluster-${i}`,
+      "@x": Math.random() * 500 - 250,
+      "@y": Math.random() * 500 - 250,
+      "@title": `${result.content}`,
+      "@color": `#${Math.floor(Math.random() * 16777215).toString(16)}`,
+    });
+    canvasEl.appendChild(clusterGroupEl);
+
     for (let j = 0; j < cluster.length; j++) {
-      app_el.innerHTML += `<li>${cluster[j]}</li>`;
+      const noteEl = document.createElement("sticky-note");
+      noteEl.updateElement({
+        "@id": `note-${j}`,
+        "@x": Math.random() * 200 - 100,
+        "@y": Math.random() * 200 - 100,
+        "@color": `#${Math.floor(Math.random() * 16777215).toString(16)}`,
+        innerHTML: cluster[j].substring(2),
+      });
+      clusterGroupEl.appendChild(noteEl);
     }
-    app_el.innerHTML += `</ul>`;
   }
 }
 
