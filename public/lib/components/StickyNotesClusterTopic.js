@@ -20,7 +20,7 @@ export class StickyNotesClusterTopic extends StickyNotesCanvasChildDraggableMixi
         align-items: center;
         border: 1px solid black;
         box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.5);
-        z-index: -100;
+        z-index: 0;
       }
     </style>
     <span class="title"></span>
