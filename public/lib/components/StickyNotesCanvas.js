@@ -63,9 +63,10 @@ export class StickyNotesCanvas extends DraggableMixin(BaseElement) {
       300.0, // Spring stiffness
       200.0, // Node repulsion
       0.5, // Damping
-      0.01 // minEnergyThreshold
+      0.5 // minEnergyThreshold
     );
 
+    // HACK: wedge in a handler to fire just before layout tick
     const layoutTick = this.layout.tick.bind(this.layout);
     this.layout.tick = (timestep) => {
       this.rendererBeforeTick(timestep);
@@ -81,10 +82,7 @@ export class StickyNotesCanvas extends DraggableMixin(BaseElement) {
       () => { this.rendering = true },
     );
 
-    this.mainNode = new Springy.Node("main", { mass: 100000 });
-    this.graph.addNode(this.mainNode);
-
-    this.mutationObserver.observe(this, { childList: true, subtree: true });
+    this.mutationObserver.observe(this, { attributes: true, childList: true, subtree: true });
 
     for (const noteEl of this.querySelectorAll("sticky-note")) {
       this.upsertGraphNode(noteEl);
@@ -172,22 +170,26 @@ export class StickyNotesCanvas extends DraggableMixin(BaseElement) {
 
   handleMutations(records) {
     for (const record of records) {
-      for (const node of record.removedNodes) {
-        if (node instanceof StickyNotesClusterLink) {
-          this.removeTopicLink(record.target, node);
-        } else if (node instanceof StickyNotesClusterTopic) {
-          this.graph.removeNode({ id: node.id });
-        } else if (node instanceof StickyNote) {
-          this.graph.removeNode({ id: node.id });
+      if (record.type == 'attributes') {
+        if (!this.rendering) this.renderer.start();
+      } else if (record.type == 'childList') {
+        for (const node of record.removedNodes) {
+          if (node instanceof StickyNotesClusterLink) {
+            this.removeTopicLink(record.target, node);
+          } else if (node instanceof StickyNotesClusterTopic) {
+            this.graph.removeNode({ id: node.id });
+          } else if (node instanceof StickyNote) {
+            this.graph.removeNode({ id: node.id });
+          }
         }
-      }
-      for (const node of record.addedNodes) {
-        if (node instanceof StickyNotesClusterLink) {
-          this.addTopicLink(record.target, node);
-        } else if (node instanceof StickyNotesClusterTopic) {
-          this.addTopic(node);
-        } else if (node instanceof StickyNote) {
-          this.upsertGraphNode(node);
+        for (const node of record.addedNodes) {
+          if (node instanceof StickyNotesClusterLink) {
+            this.addTopicLink(record.target, node);
+          } else if (node instanceof StickyNotesClusterTopic) {
+            this.addTopic(node);
+          } else if (node instanceof StickyNote) {
+            this.upsertGraphNode(node);
+          }
         }
       }
     }
