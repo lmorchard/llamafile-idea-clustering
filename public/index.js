@@ -23,7 +23,7 @@ const USER_PROMPT = (items) => `
   Please generate a concise, descriptive label for this list. Thanks in advance!
   `;
 
-const CLUSTER_LAYOUT_RADIUS = 1250;
+const CLUSTER_LAYOUT_RADIUS = 1200;
 
 async function main() {
   console.log("READY.");
@@ -41,13 +41,28 @@ async function main() {
     canvasEl.appendChild(
       createElement("sticky-note", {
         id: item.id,
-        x: Math.random() * 300 - 150,
-        y: Math.random() * 300 - 150,
+        x: Math.random() * 200 - 100,
+        y: Math.random() * 200 - 100,
         color: `#${Math.floor(Math.random() * 16777215).toString(16)}`,
         ".innerHTML": item.item.substring(2),
       })
     );
   }
+
+  canvasEl.appendChild(createElement("sticky-notes-cluster-topic", {
+    id: `cluster-main`,
+    x: 0,
+    y: 0,
+    width: 100,
+    height: 100,
+    title: `unorganized`,
+    color: `#eee`,
+    children: itemsWithIds.map((item) =>
+      createElement("sticky-notes-cluster-link", {
+        href: `${item.id}`,
+      })
+    ),
+  }));
 
   const embeddingsResponse = await llamafile("embedding", { content: items });
   const embeddings = embeddingsResponse.results.map((r) => r.embedding);
@@ -75,14 +90,19 @@ async function main() {
     const clusterX = Math.cos(clusterAngle) * CLUSTER_LAYOUT_RADIUS;
     const clusterY = Math.sin(clusterAngle) * CLUSTER_LAYOUT_RADIUS;
 
+    for (const item of cluster) {
+      const linkEl = document.querySelector(`sticky-notes-cluster-link[href="${item.id}"]`);
+      linkEl.parentElement.removeChild(linkEl);
+    }
+
     const clusterGroupEl = createElement("sticky-notes-cluster-topic", {
       id: `cluster-${i}`,
       x: clusterX,
       y: clusterY,
-      width: 150,
-      height: 125,
+      width: 350,
+      height: 200,
       title: `${result.content.trim()}`,
-      color: `#999`,
+      color: `#eee`,
       children: cluster.map((item) =>
         createElement("sticky-notes-cluster-link", {
           href: `${item.id}`,

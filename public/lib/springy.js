@@ -346,7 +346,11 @@
 	Layout.ForceDirected.prototype.point = function(node) {
 		if (!(node.id in this.nodePoints)) {
 			var mass = (node.data.mass !== undefined) ? node.data.mass : 1.0;
-			this.nodePoints[node.id] = new Layout.ForceDirected.Point(Vector.random(), mass);
+      //LMO
+      var vector = ('x' in node.data && 'y' in node.data)
+        ? new Vector(node.data.x, node.data.y)
+        : Vector.random();
+			this.nodePoints[node.id] = new Layout.ForceDirected.Point(vector, mass);
 		}
 
 		return this.nodePoints[node.id];
