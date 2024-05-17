@@ -18,8 +18,8 @@ export const StickyNotesCanvasChildDraggableMixin = (Base = BaseElement) =>
     }
 
     onDragged(sx, sy, dx, dy) {
-      this.attributes.x.value = sx + dx;
-      this.attributes.y.value = sy + dy;
+      this.attributes.x.value = sx + (dx / this.zoom);
+      this.attributes.y.value = sy + (dy / this.zoom);
     }
   };
 

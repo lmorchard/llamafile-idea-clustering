@@ -22,17 +22,9 @@ export class StickyNotesCanvas extends GraphLayoutMixin(
         left: 0;
         width: 100%;
         height: 100%;
-      }
-      .canvas {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 1000px;
-        height: 1000px;
-        transform: translate(50%, 50%);
 
         /*
-        --dot-bg: rgba(250, 250, 250, 1.0);
+        --dot-bg: rgba(250, 250, 250, 1);
         --dot-color: #000;
         --dot-size: 1px;
         --dot-space: 22px;
@@ -48,7 +40,7 @@ export class StickyNotesCanvas extends GraphLayoutMixin(
             )
             center / var(--dot-space) var(--dot-space),
           var(--dot-color);
-          */
+        */
       }
     </style>
 
