@@ -10,7 +10,7 @@ export const StickyNotesCanvasChildDraggableMixin = (Base = BaseElement) =>
       return parentCanvas ? parseFloat(parentCanvas.zoom) : 1;
     }
 
-    getDragStartPosition() {
+    onDragStart() {
       return {
         x: parseInt(this.attributes.x.value),
         y: parseInt(this.attributes.y.value),

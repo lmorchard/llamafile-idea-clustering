@@ -88,7 +88,7 @@ async function main() {
 
     const clusterAngle = (i / clusters.length) * Math.PI * 2;
     const clusterX = Math.cos(clusterAngle) * CLUSTER_LAYOUT_RADIUS;
-    const clusterY = Math.sin(clusterAngle) * CLUSTER_LAYOUT_RADIUS;
+    const clusterY = Math.sin(clusterAngle) * (CLUSTER_LAYOUT_RADIUS / 2);
 
     for (const item of cluster) {
       const linkEl = document.querySelector(`sticky-notes-cluster-link[href="${item.id}"]`);

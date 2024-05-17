@@ -2,17 +2,14 @@ export const DraggableMixin = (Base) =>
   class extends Base {
     connectedCallback() {
       super.connectedCallback();
-
       this.dragging = false;
       this.addEventListener("mousedown", this.onMouseDown);
     }
 
     onMouseDown(ev) {
-      const startPosition = this.getDragStartPosition();
-      const dragClientStart = { x: ev.clientX, y: ev.clientY };
-
       this.dragging = true;
-      this.onDragStart();
+      const startPosition = this.onDragStart();
+      const dragClientStart = { x: ev.clientX, y: ev.clientY };
 
       const onMouseMove = (ev) => {
         const dx = ev.clientX - dragClientStart.x;
@@ -33,13 +30,11 @@ export const DraggableMixin = (Base) =>
       ev.stopPropagation();
     }
 
-    getDragStartPosition() {
+    onDragStart() {
       return { x: 0, y: 0 };
     }
 
-    onDragStart() {}
-
-    onDragged(sx, sy, dx, dy) {}
+    onDragged(startX, startY, deltaX, deltaY) {}
 
     onDragEnd() {}
   };

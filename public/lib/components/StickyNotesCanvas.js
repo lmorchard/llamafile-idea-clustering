@@ -22,25 +22,20 @@ export class StickyNotesCanvas extends GraphLayoutMixin(
         left: 0;
         width: 100%;
         height: 100%;
+      }
+      .canvas {
 
-        /*
-        --dot-bg: rgba(250, 250, 250, 1);
-        --dot-color: #000;
-        --dot-size: 1px;
-        --dot-space: 22px;
-        background: linear-gradient(
-              90deg,
-              var(--dot-bg) calc(var(--dot-space) - var(--dot-size)),
-              transparent 1%
-            )
-            center / var(--dot-space) var(--dot-space),
-          linear-gradient(
-              var(--dot-bg) calc(var(--dot-space) - var(--dot-size)),
-              transparent 1%
-            )
-            center / var(--dot-space) var(--dot-space),
-          var(--dot-color);
-        */
+      }
+      .background {
+        position: absolute;
+        width: 20000px;
+        height: 10000px;
+        left: -10000px;
+        top: -5000px;
+        z-index: -100;
+
+        background-image: radial-gradient(circle at 5px 5px, rgba(0, 0, 0, 0.25) 3px, transparent 0);
+        background-size: 40px 40px;
       }
     </style>
 
@@ -48,6 +43,7 @@ export class StickyNotesCanvas extends GraphLayoutMixin(
       <div class="canvas">
         <slot></slot>
       </div>
+      <div class="background"></div>
     </div>
   `;
 
