@@ -49,6 +49,8 @@ export function createElement(name, changeSet = {}, context = document) {
 }
 
 export class BaseElement extends HTMLElement {
+  static observedAttributes = [];
+
   static template = html`<slot></slot>`;
 
   constructor() {

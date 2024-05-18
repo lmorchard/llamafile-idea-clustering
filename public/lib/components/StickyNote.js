@@ -1,11 +1,9 @@
-import { html } from "../dom.js";
+import { html, BaseElement } from "../dom.js";
 import { StickyNotesCanvasChildDraggableMixin } from "../mixins/StickyNotesCanvasChildDraggableMixin.js";
 
-export class StickyNote extends StickyNotesCanvasChildDraggableMixin() {
-  static observedAttributes = [
-    ...StickyNotesCanvasChildDraggableMixin.observedAttributes,
-    "color",
-  ];
+const BaseClass = StickyNotesCanvasChildDraggableMixin(BaseElement);
+export class StickyNote extends BaseClass {
+  static observedAttributes = [...BaseClass.observedAttributes, "color"];
 
   static template = html`
     <style>

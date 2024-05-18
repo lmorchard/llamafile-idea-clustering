@@ -1,5 +1,7 @@
-export const DraggableMixin = (Base) =>
-  class extends Base {
+import { BaseElement } from "../dom.js";
+
+export const DraggableMixin = (BaseClass = BaseElement) =>
+  class extends BaseClass {
     connectedCallback() {
       super.connectedCallback();
       this.dragging = false;

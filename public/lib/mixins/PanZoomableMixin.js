@@ -1,7 +1,19 @@
 import { DraggableMixin } from "./DraggableMixin.js";
 
-export const PanZoomableMixin = (Base) =>
-  class extends DraggableMixin(Base) {
+export const PanZoomableMixin = (ClassToExtend) => {
+  const BaseClass = DraggableMixin(ClassToExtend);
+
+  return class extends BaseClass {
+    static observedAttributes = [
+      ...BaseClass.observedAttributes,
+      "originx",
+      "originy",
+      "zoom",
+      "minzoom",
+      "maxzoom",
+      "wheelfactor",
+    ];
+
     constructor() {
       super();
       this.minZoom = 0.2;
@@ -82,12 +94,4 @@ export const PanZoomableMixin = (Base) =>
       `;
     }
   };
-
-PanZoomableMixin.observedAttributes = [
-  "originx",
-  "originy",
-  "zoom",
-  "minzoom",
-  "maxzoom",
-  "wheelfactor",
-];
+};
