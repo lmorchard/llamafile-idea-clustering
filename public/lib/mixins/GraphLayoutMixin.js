@@ -8,10 +8,9 @@ import { StickyNote } from "../components/StickyNote.js";
 
 export const GraphLayoutMixin = (BaseClass) =>
   class extends BaseClass {
-    static observedAttributes = [
-      ...BaseClass.observedAttributes,
-      "graph-layout-scale",
-    ];
+    static properties = {
+      graphLayoutScale: { type: Number }
+    };
 
     constructor() {
       super();
@@ -78,8 +77,8 @@ export const GraphLayoutMixin = (BaseClass) =>
       this.layout.eachNode((node, point) => {
         const el = this.ownerDocument.getElementById(node.id);
         if (!el) return;
-        point.p.x = parseFloat(el.attributes.x.value) / this.graphLayoutScale;
-        point.p.y = parseFloat(el.attributes.y.value) / this.graphLayoutScale;
+        point.p.x = el.x / this.graphLayoutScale;
+        point.p.y = el.y / this.graphLayoutScale;
       });
     }
 
@@ -88,8 +87,8 @@ export const GraphLayoutMixin = (BaseClass) =>
     rendererDrawNode(node, pointP) {
       const el = this.ownerDocument.getElementById(node.id);
       if (!el || el.dragging) return;
-      el.attributes.x.value = pointP.x * this.graphLayoutScale;
-      el.attributes.y.value = pointP.y * this.graphLayoutScale;
+      el.x = pointP.x * this.graphLayoutScale;
+      el.y = pointP.y * this.graphLayoutScale;
     }
 
     disconnectedCallback() {
@@ -155,8 +154,8 @@ export const GraphLayoutMixin = (BaseClass) =>
         // HACK: define this mass as an attribute on the element
         const mass =
           nodeEl.tagName === "STICKY-NOTES-CLUSTER-TOPIC" ? 10000 : 1;
-        const x = parseFloat(nodeEl.attributes.x.value) / this.graphLayoutScale;
-        const y = parseFloat(nodeEl.attributes.y.value) / this.graphLayoutScale;
+        const x = parseFloat(nodeEl.x) / this.graphLayoutScale;
+        const y = parseFloat(nodeEl.y) / this.graphLayoutScale;
         node = new Springy.Node(nodeId, { mass, x, y });
         this.graph.addNode(node);
       }

@@ -71,12 +71,11 @@ export const PanZoomableMixin = (ClassToExtend) => {
     updated(changedProperties) {
       super.updated(changedProperties);
 
-      const zoom = this.zoom;
       const translateX = this.clientWidth / 2 - this.originx;
       const translateY = this.clientHeight / 2 - this.originy;
 
       this.viewport.style.transform = `
-        scale(${zoom})
+        scale(${this.zoom})
         translate(${translateX}px, ${translateY}px)
       `;
     }
