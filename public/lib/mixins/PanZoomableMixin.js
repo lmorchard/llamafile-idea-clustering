@@ -1,9 +1,8 @@
+import { LitElement } from "../vendor/lit-all.min.js";
 import { DraggableMixin } from "./DraggableMixin.js";
 
-export const PanZoomableMixin = (ClassToExtend) => {
-  const BaseClass = DraggableMixin(ClassToExtend);
-
-  return class extends BaseClass {
+export const PanZoomableMixin = (BaseClass = LitElement) =>
+  class extends DraggableMixin(BaseClass) {
     static properties = {
       originx: { type: Number },
       originy: { type: Number },
@@ -80,4 +79,3 @@ export const PanZoomableMixin = (ClassToExtend) => {
       `;
     }
   };
-};

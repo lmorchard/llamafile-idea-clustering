@@ -15,8 +15,8 @@ export const StickyNotesCanvasChildDraggableMixin = (BaseClass = LitElement) =>
 
     onDragStart() {
       return {
-        x: parseInt(this.x),
-        y: parseInt(this.y),
+        x: this.x,
+        y: this.y,
       };
     }
 
