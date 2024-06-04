@@ -1,48 +1,43 @@
-import { html, BaseElement } from "../dom.js";
+import { LitElement, html, css } from "../vendor/lit-all.min.js";
 import { StickyNotesCanvasChildDraggableMixin } from "../mixins/StickyNotesCanvasChildDraggableMixin.js";
 
-const BaseClass = StickyNotesCanvasChildDraggableMixin(BaseElement);
+const BaseClass = StickyNotesCanvasChildDraggableMixin(LitElement);
 export class StickyNotesClusterTopic extends BaseClass {
-  static observedAttributes = [...BaseClass.observedAttributes, "color"];
-
-  static template = html`
-    <style>
-      :host {
-        position: absolute;
-        padding: 1em;
-        transform: translate(-50%, -50%);
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        text-align: center;
-        align-items: center;
-        border: 1px solid black;
-        box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.5);
-        z-index: 0;
-      }
-    </style>
-    <span class="title"></span>
+  static styles = css`
+    :host {
+      position: absolute;
+      padding: 1em;
+      transform: translate(-50%, -50%);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      text-align: center;
+      align-items: center;
+      border: 1px solid black;
+      box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.5);
+      z-index: 0;
+    }
   `;
-
-  update() {
-    super.update();
-
-    this.style.backgroundColor = this.attributes.color.value;
-    this.$(".title").innerText = this.getAttribute("title");
+  render() {
+    return html` <span class="title">${this.title}</span> `;
   }
 }
 
 customElements.define("sticky-notes-cluster-topic", StickyNotesClusterTopic);
 
-export class StickyNotesClusterLink extends BaseElement {
-  static observedAttributes = ["id", "href"];
-  static template = html`
-    <style>
-      :host {
-        visibility: hidden;
-      }
-    </style>
+export class StickyNotesClusterLink extends LitElement {
+  static properties = {
+    id: { type: String },
+    href: { type: String },
+  };
+  static styles = css`
+    :host {
+      visibility: hidden;
+    }
   `;
+  render() {
+    return;
+  }
 }
 
 customElements.define("sticky-notes-cluster-link", StickyNotesClusterLink);

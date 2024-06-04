@@ -1,3 +1,4 @@
+import { LitElement } from "./lib/vendor/lit-all.min.js";
 import { llama } from "./completion.js";
 import { items } from "./items.js";
 import "./skmeans.js";

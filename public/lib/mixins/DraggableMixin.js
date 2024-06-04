@@ -1,6 +1,6 @@
-import { BaseElement } from "../dom.js";
+import { LitElement } from "../vendor/lit-all.min.js";
 
-export const DraggableMixin = (BaseClass = BaseElement) =>
+export const DraggableMixin = (BaseClass = LitElement) =>
   class extends BaseClass {
     connectedCallback() {
       super.connectedCallback();

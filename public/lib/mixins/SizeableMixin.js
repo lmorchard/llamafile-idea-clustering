@@ -1,17 +1,14 @@
-import { BaseElement } from "../dom.js";
+import { LitElement } from "../vendor/lit-all.min.js";
 
-export const SizeableMixin = (BaseClass = BaseElement) =>
+export const SizeableMixin = (BaseClass = LitElement) =>
   class extends BaseClass {
-    static observedAttributes = [
-      ...BaseClass.observedAttributes,
-      "width",
-      "height",
-    ];
-
-    update() {
-      super.update();
-      const attrs = this.getObservedAttributes();
-      this.style.width = `${attrs.width}px`;
-      this.style.height = `${attrs.height}px`;
+    static properties = {
+      "width": { type: Number },
+      "height": { type: Number },
+    };
+    updated(changedProperties) {
+      super.updated(changedProperties);
+      this.style.width = `${this.width}px`;
+      this.style.height = `${this.height}px`;
     }
   };

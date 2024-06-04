@@ -4,15 +4,14 @@ export const PanZoomableMixin = (ClassToExtend) => {
   const BaseClass = DraggableMixin(ClassToExtend);
 
   return class extends BaseClass {
-    static observedAttributes = [
-      ...BaseClass.observedAttributes,
-      "originx",
-      "originy",
-      "zoom",
-      "minzoom",
-      "maxzoom",
-      "wheelfactor",
-    ];
+    static properties = {
+      originx: { type: Number },
+      originy: { type: Number },
+      zoom: { type: Number },
+      minzoom: { type: Number },
+      maxzoom: { type: Number },
+      wheelfactor: { type: Number },
+    };
 
     constructor() {
       super();
@@ -28,15 +27,7 @@ export const PanZoomableMixin = (ClassToExtend) => {
     }
 
     get viewport() {
-      return this.$(".viewport");
-    }
-
-    get zoom() {
-      return parseFloat(this.attributes.zoom.value);
-    }
-
-    set zoom(value) {
-      this.attributes.zoom.value = value;
+      return this.shadowRoot.querySelector(".viewport");
     }
 
     onWheel(ev) {
@@ -61,32 +52,28 @@ export const PanZoomableMixin = (ClassToExtend) => {
       const zoomOffsetY = zoomY / oldZoom - zoomY / newZoom;
 
       // Nudge the center of the viewport to keep the content under pointer in the same position
-      const originX = parseFloat(this.attributes.originx.value);
-      const originY = parseFloat(this.attributes.originy.value);
-      this.attributes.originx.value = originX + zoomOffsetX;
-      this.attributes.originy.value = originY + zoomOffsetY;
+      this.originx = this.originx + zoomOffsetX;
+      this.originy = this.originy + zoomOffsetY;
     }
 
     onDragStart() {
       return {
-        x: parseFloat(this.attributes.originx.value),
-        y: parseFloat(this.attributes.originy.value),
+        x: this.originx,
+        y: this.originy,
       };
     }
 
     onDragged(panStartX, panStartY, deltaX, deltaY) {
-      this.attributes.originx.value = panStartX - deltaX / this.zoom;
-      this.attributes.originy.value = panStartY - deltaY / this.zoom;
+      this.originx = panStartX - deltaX / this.zoom;
+      this.originy = panStartY - deltaY / this.zoom;
     }
 
-    update() {
+    updated(changedProperties) {
+      super.updated(changedProperties);
+
       const zoom = this.zoom;
-
-      const originX = parseFloat(this.attributes.originx.value);
-      const originY = parseFloat(this.attributes.originy.value);
-
-      const translateX = this.clientWidth / 2 - originX;
-      const translateY = this.clientHeight / 2 - originY;
+      const translateX = this.clientWidth / 2 - this.originx;
+      const translateY = this.clientHeight / 2 - this.originy;
 
       this.viewport.style.transform = `
         scale(${zoom})

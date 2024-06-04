@@ -1,14 +1,12 @@
 import { LitElement } from "../vendor/lit-all.min.js";
 
-export const PositionableMixin = (BaseClass = LitElement) =>
+export const ColorableMixin = (BaseClass = LitElement) =>
   class extends BaseClass {
     static properties = {
-      "x": { type: Number },
-      "y": { type: Number },
+      color: { type: String },
     };
     updated(changedProperties) {
       super.updated(changedProperties);
-      this.style.left = `${this.x}px`;
-      this.style.top = `${this.y}px`;
+      this.style.backgroundColor = this.color;
     }
   };
