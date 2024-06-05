@@ -3,8 +3,8 @@ import { LitElement } from "../vendor/lit-all.min.js";
 export const SizeableMixin = (BaseClass = LitElement) =>
   class extends BaseClass {
     static properties = {
-      "width": { type: Number },
-      "height": { type: Number },
+      "width": { type: Number, reflect: true },
+      "height": { type: Number, reflect: true },
     };
     updated(changedProperties) {
       super.updated(changedProperties);

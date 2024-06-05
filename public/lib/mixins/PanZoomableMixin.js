@@ -4,12 +4,12 @@ import { DraggableMixin } from "./DraggableMixin.js";
 export const PanZoomableMixin = (BaseClass = LitElement) =>
   class extends DraggableMixin(BaseClass) {
     static properties = {
-      originx: { type: Number },
-      originy: { type: Number },
-      zoom: { type: Number },
-      minzoom: { type: Number },
-      maxzoom: { type: Number },
-      wheelfactor: { type: Number },
+      originx: { type: Number, reflect: true },
+      originy: { type: Number, reflect: true  },
+      zoom: { type: Number, reflect: true  },
+      minzoom: { type: Number, reflect: true  },
+      maxzoom: { type: Number, reflect: true  },
+      wheelfactor: { type: Number, reflect: true  },
     };
 
     constructor() {

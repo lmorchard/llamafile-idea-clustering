@@ -2,6 +2,10 @@ import { LitElement } from "../vendor/lit-all.min.js";
 
 export const DraggableMixin = (BaseClass = LitElement) =>
   class extends BaseClass {
+    static properties = {
+      dragging: { type: Boolean, reflect: true },
+    };
+
     connectedCallback() {
       super.connectedCallback();
       this.dragging = false;

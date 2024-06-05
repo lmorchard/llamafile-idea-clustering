@@ -3,8 +3,8 @@ import { LitElement } from "../vendor/lit-all.min.js";
 export const PositionableMixin = (BaseClass = LitElement) =>
   class extends BaseClass {
     static properties = {
-      "x": { type: Number },
-      "y": { type: Number },
+      "x": { type: Number, reflect: true },
+      "y": { type: Number, reflect: true },
     };
     updated(changedProperties) {
       super.updated(changedProperties);

@@ -9,7 +9,7 @@ import { StickyNote } from "../components/StickyNote.js";
 export const GraphLayoutMixin = (BaseClass) =>
   class extends BaseClass {
     static properties = {
-      graphLayoutScale: { type: Number }
+      graphLayoutScale: { type: Number, reflect: true },
     };
 
     constructor() {
@@ -44,16 +44,13 @@ export const GraphLayoutMixin = (BaseClass) =>
       };
 
       this.renderer = new Springy.Renderer(
-        this.layout,
+        this.layout, // layout
         () => {}, // clear
         this.rendererDrawEdge.bind(this),
         this.rendererDrawNode.bind(this),
-        () => {
-          this.rendering = false;
-        },
-        () => {
-          this.rendering = true;
-        }
+        () => (this.rendering = false), // onRenderStop
+        () => (this.rendering = true), // onRenderStart
+        // onRenderFrame
       );
 
       this.mutationObserver.observe(this, {

@@ -1,4 +1,4 @@
-import { LitElement, html } from "./lib/vendor/lit-all.min.js";
+import { LitElement, html, render } from "./lib/vendor/lit-all.min.js";
 import { llama } from "./completion.js";
 import { items } from "./items.js";
 import "./skmeans.js";
@@ -50,20 +50,22 @@ async function main() {
     );
   }
 
-  canvasEl.appendChild(createElement("sticky-notes-cluster-topic", {
-    id: `cluster-main`,
-    x: 0,
-    y: 0,
-    width: 100,
-    height: 100,
-    title: `unorganized`,
-    color: `#eee`,
-    children: itemsWithIds.map((item) =>
-      createElement("sticky-notes-cluster-link", {
-        href: `${item.id}`,
-      })
-    ),
-  }));
+  canvasEl.appendChild(
+    createElement("sticky-notes-cluster-topic", {
+      id: `cluster-main`,
+      x: 0,
+      y: 0,
+      width: 100,
+      height: 100,
+      title: `unorganized`,
+      color: `#eee`,
+      children: itemsWithIds.map((item) =>
+        createElement("sticky-notes-cluster-link", {
+          href: `${item.id}`,
+        })
+      ),
+    })
+  );
 
   const embeddingsResponse = await llamafile("embedding", { content: items });
   const embeddings = embeddingsResponse.results.map((r) => r.embedding);
@@ -92,7 +94,9 @@ async function main() {
     const clusterY = Math.sin(clusterAngle) * (CLUSTER_LAYOUT_RADIUS / 2);
 
     for (const item of cluster) {
-      const linkEl = document.querySelector(`sticky-notes-cluster-link[href="${item.id}"]`);
+      const linkEl = document.querySelector(
+        `sticky-notes-cluster-link[href="${item.id}"]`
+      );
       linkEl.parentElement.removeChild(linkEl);
     }
 
