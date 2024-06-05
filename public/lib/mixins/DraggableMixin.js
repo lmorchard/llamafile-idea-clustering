@@ -9,7 +9,8 @@ export const DraggableMixin = (BaseClass = LitElement) =>
     connectedCallback() {
       super.connectedCallback();
       this.dragging = false;
-      this.addEventListener("mousedown", this.onMouseDown);
+      this.onMouseDownHandler = this.onMouseDown.bind(this);
+      this.addEventListener("mousedown", this.onMouseDownHandler);
     }
 
     onMouseDown(ev) {
@@ -32,7 +33,7 @@ export const DraggableMixin = (BaseClass = LitElement) =>
       };
       document.addEventListener("mouseup", onMouseUp);
 
-      ev.preventDefault();
+      //ev.preventDefault();
       ev.stopPropagation();
     }
 

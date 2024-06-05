@@ -31,7 +31,7 @@ export const GraphLayoutMixin = (BaseClass) =>
       this.layout = new Springy.Layout.ForceDirected(
         this.graph,
         300, // Spring stiffness
-        200, // Node repulsion
+        600, // Node repulsion
         0.5, // Damping
         0.5 // minEnergyThreshold
       );

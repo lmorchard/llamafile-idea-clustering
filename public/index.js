@@ -17,11 +17,10 @@ const PROMPT_TEMPLATE = (system, user) => `<|system|>
 const SYSTEM_PROMPT = "You are a helpful but terse assistant.";
 
 const USER_PROMPT = (items) => `
-  Please generate a succinct label that effectively encapsulates the overall theme or purpose for the following list of items:
+  Please generate a succinct label that effectively encapsulates the overall theme
+  or purpose for the following list of items:
 
   ${items.join("\n")}
-
-  Please generate a concise, descriptive label for this list. Thanks in advance!
   `;
 
 const CLUSTER_LAYOUT_RADIUS = 1200;
@@ -45,11 +44,12 @@ async function main() {
         x: Math.random() * 200 - 100,
         y: Math.random() * 200 - 100,
         color: `#${Math.floor(Math.random() * 16777215).toString(16)}`,
-        ".innerHTML": item.item.substring(2),
+        ".innerHTML": `${item.item.substring(2)}`,
       })
     );
   }
 
+  /*
   canvasEl.appendChild(
     createElement("sticky-notes-cluster-topic", {
       id: `cluster-main`,
@@ -66,6 +66,35 @@ async function main() {
       ),
     })
   );
+  */
+
+  canvasEl.addEventListener("reset", async () => resetNotes(canvasEl));
+  canvasEl.addEventListener("organize", async () => {
+    await resetNotes(canvasEl);
+    await organizeNotes(canvasEl);
+  });
+}
+
+async function resetNotes(canvasEl) {
+  for (const link of canvasEl.querySelectorAll("sticky-notes-cluster-link")) {
+    link.parentElement.removeChild(link);
+  }
+  for (const topic of canvasEl.querySelectorAll("sticky-notes-cluster-topic")) {
+    topic.parentElement.removeChild(topic);
+  }
+}
+
+async function organizeNotes(canvasEl) {
+  const notes = canvasEl.querySelectorAll("sticky-note");
+  const itemsWithIds = [];
+  for (const note of notes) {
+    itemsWithIds.push({
+      id: note.id,
+      item: note.innerText,
+    });
+  }
+
+  console.log(itemsWithIds);
 
   const embeddingsResponse = await llamafile("embedding", { content: items });
   const embeddings = embeddingsResponse.results.map((r) => r.embedding);
@@ -87,6 +116,9 @@ async function main() {
     const result = await llamafile("completion", {
       prompt,
       n_predict: 16,
+      temperature: 0.1,
+      top_k: 3,
+      top_p: 0.9,
     });
 
     const clusterAngle = (i / clusters.length) * Math.PI * 2;
@@ -97,7 +129,7 @@ async function main() {
       const linkEl = document.querySelector(
         `sticky-notes-cluster-link[href="${item.id}"]`
       );
-      linkEl.parentElement.removeChild(linkEl);
+      if (linkEl) linkEl.parentElement.removeChild(linkEl);
     }
 
     const clusterGroupEl = createElement("sticky-notes-cluster-topic", {
