@@ -1,49 +1,10 @@
 import { LitElement, html, css } from "../vendor/lit-all.min.js";
 import { Pane } from "../vendor/tweakpane.min.js";
+import { ConfirmDialog } from "./ConfirmDialog.js";
 
 export class StickyNotesTweakPane extends LitElement {
-  static styles = css`
-    dialog.prompt-editor {
-      padding: 1em;
-      width: 40vw;
-    }
-    dialog.prompt-editor label {
-      display: block;
-      margin: 0 0 1em 0;
-    }
-    dialog.prompt-editor textarea {
-      width: 100%;
-    }
-    dialog.prompt-editor .actions {
-      margin-top: 1em;
-      display: flex;
-      flex-direction: row;
-      justify-content: flex-end;
-      width: 100%;
-    }
-    dialog.prompt-editor .actions button {
-      padding: 0.5em 1em;
-      margin-left: 0.5em;
-    }
-  `;
-
   render() {
-    return html`
-      <dialog class="prompt-editor" @click=${this.onClickPromptEditor}>
-        <label>
-          System prompt
-          <textarea class="system" rows="7"></textarea>
-        </label>
-        <label>
-          User prompt
-          <textarea class="user" rows="7" autofocus></textarea>
-        </label>
-        <div class="actions">
-          <button @click=${this.confirmPromptEditor}>Ok</button>
-          <button @click=${this.cancelPromptEditor}>Cancel</button>
-        </div>
-      </dialog>
-    `;
+    return html` <sticky-notes-prompt-editor></sticky-notes-prompt-editor> `;
   }
 
   get app() {
@@ -51,27 +12,18 @@ export class StickyNotesTweakPane extends LitElement {
   }
 
   get promptEditor() {
-    return this.shadowRoot.querySelector(".prompt-editor");
-  }
-
-  onClickPromptEditor(ev) {
-    if (ev.target === this.promptEditor) this.cancelPromptEditor();
+    return this.shadowRoot.querySelector("sticky-notes-prompt-editor");
   }
 
   openPromptEditor() {
-    this.promptEditor.querySelector("textarea.system").value = this.app.promptSystem;
-    this.promptEditor.querySelector("textarea.user").value = this.app.promptUser;
-    this.promptEditor.showModal();
-  }
-
-  confirmPromptEditor() {
-    this.app.promptSystem = this.promptEditor.querySelector("textarea.system").value;
-    this.app.promptUser = this.promptEditor.querySelector("textarea.user").value;
-    this.promptEditor.close();
-  }
-
-  cancelPromptEditor() {
-    this.promptEditor.close();
+    this.promptEditor.open(
+      this.app.promptSystem,
+      this.app.promptUser,
+      ([promptSystem, promptUser]) => {
+        this.app.promptSystem = promptSystem;
+        this.app.promptUser = promptUser;
+      }
+    );
   }
 
   firstUpdated() {
@@ -164,3 +116,33 @@ export class StickyNotesTweakPane extends LitElement {
 }
 
 customElements.define("sticky-notes-tweak-pane", StickyNotesTweakPane);
+
+export class StickyNotesPromptEditor extends ConfirmDialog {
+  render() {
+    return super.render(html`
+      <label>
+        System prompt
+        <textarea class="system" rows="7"></textarea>
+      </label>
+      <label>
+        User prompt
+        <textarea class="user" rows="7" autofocus></textarea>
+      </label>
+    `);
+  }
+
+  open(promptSystem, promptUser, onConfirm, onCancel) {
+    this.dialog.querySelector("textarea.system").value = promptSystem;
+    this.dialog.querySelector("textarea.user").value = promptUser;
+    super.open(onConfirm, onCancel);
+  }
+
+  get returnValue() {
+    return [
+      this.dialog.querySelector("textarea.system").value,
+      this.dialog.querySelector("textarea.user").value,
+    ];
+  }
+}
+
+customElements.define("sticky-notes-prompt-editor", StickyNotesPromptEditor);
