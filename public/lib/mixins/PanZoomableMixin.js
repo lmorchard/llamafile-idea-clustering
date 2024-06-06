@@ -16,7 +16,7 @@ export const PanZoomableMixin = (BaseClass = LitElement) =>
       super();
       this.minZoom = 0.2;
       this.maxZoom = 5;
-      this.wheelFactor = -0.1;
+      this.wheelFactor = -0.0125;
       this.zoomOrigin = { x: 0, y: 0 };
     }
 

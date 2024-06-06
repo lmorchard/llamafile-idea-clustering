@@ -11,15 +11,11 @@ export class StickyNotesCanvas extends BaseElement {
     :host {
       display: block;
       overflow: hidden;
-    }
-    .controls {
-      position: absolute;
       top: 0;
       left: 0;
+      box-sizing: border-box;
       width: 100%;
-      height: 50px;
-      z-index: 10000;
-      padding: 10px;
+      height: 100%;
     }
     .controls button {
       padding: 1em;
@@ -45,14 +41,22 @@ export class StickyNotesCanvas extends BaseElement {
       );
       background-size: 40px 40px;
     }
+
+    ::slotted(sticky-notes-cluster-topic) {
+      font-size: var(--sticky-notes-cluster-topic-font-size);
+    }
+
+    ::slotted(sticky-note) {
+      font-size: var(--sticky-note-font-size);
+    }
   `;
+
+  get app() {
+    return this.closest("sticky-notes-app");
+  }
 
   render() {
     return html`
-      <div class="controls">
-        <button @click=${this.onClickReset}>Reset</button>
-        <button @click=${this.onClickOrganize}>Organize</button>
-      </div>
       <div class="viewport">
         <div class="canvas">
           <slot></slot>
@@ -60,19 +64,6 @@ export class StickyNotesCanvas extends BaseElement {
         <div class="background"></div>
       </div>
     `;
-  }
-
-  static EV_ORGANIZE = "organize";
-  static EV_RESET = "reset";
-
-  onClickOrganize(ev) {
-    const event = new Event(this.constructor.EV_ORGANIZE);
-    this.dispatchEvent(event);
-  }
-
-  onClickReset(ev) {
-    const event = new Event(this.constructor.EV_RESET);
-    this.dispatchEvent(event);
   }
 }
 

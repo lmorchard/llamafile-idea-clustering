@@ -57,6 +57,10 @@ export const SelectableManagerMixin = (BaseClass = LitElement) =>
     static CLASS_SELECTABLE = CLASS_SELECTABLE;
     static CLASS_SELECTED = CLASS_SELECTED;
 
+    get selected() {
+      return this.querySelector(`.${this.constructor.CLASS_SELECTED}`);
+    }
+
     updated(changedProperties) {
       super.updated(changedProperties);
       this.classList.add(this.constructor.CLASS_SELECTABLE_MANAGER);

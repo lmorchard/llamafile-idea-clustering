@@ -1,4 +1,3 @@
-import { $$ } from "../dom.js";
 import Springy from "../springy.js";
 import {
   StickyNotesClusterTopic,
@@ -72,7 +71,7 @@ export const GraphLayoutMixin = (BaseClass) =>
 
     rendererBeforeTick() {
       this.layout.eachNode((node, point) => {
-        const el = this.ownerDocument.getElementById(node.id);
+        const el = this.querySelector(`#${node.id}`);
         if (!el) return;
         point.p.x = el.x / this.graphLayoutScale;
         point.p.y = el.y / this.graphLayoutScale;
@@ -82,7 +81,7 @@ export const GraphLayoutMixin = (BaseClass) =>
     rendererDrawEdge(edge, fromPointP, toPointP) {}
 
     rendererDrawNode(node, pointP) {
-      const el = this.ownerDocument.getElementById(node.id);
+      const el = this.querySelector(`#${node.id}`);
       if (!el || el.dragging) return;
       el.x = pointP.x * this.graphLayoutScale;
       el.y = pointP.y * this.graphLayoutScale;
@@ -124,14 +123,14 @@ export const GraphLayoutMixin = (BaseClass) =>
     addTopic(topicEl) {
       this.upsertGraphNode(topicEl);
       // TODO: make these more generic types for entity / link / cluster?
-      for (const linkEl of $$("sticky-notes-cluster-link", topicEl)) {
+      for (const linkEl of topicEl.querySelectorAll("sticky-notes-cluster-link")) {
         this.addTopicLink(topicEl, linkEl);
       }
     }
 
     addTopicLink(topicEl, linkEl) {
       const linkedId = linkEl.getAttribute("href");
-      const linkedEl = this.ownerDocument.getElementById(linkedId);
+      const linkedEl = this.querySelector(`#${linkedId}`);
       if (!linkedEl) return;
       let linkedNode = this.upsertGraphNode(linkedEl);
       this.upsertGraphEdge(topicEl.id, linkedNode.id);
