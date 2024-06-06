@@ -7,16 +7,25 @@ import "../vendor/skmeans.js";
 
 const DEFAULT_CLUSTER_LAYOUT_RADIUS = 1200;
 const DEFAULT_NUM_CLUSTERS = 10;
+
 const DEFAULT_SYSTEM_PROMPT = "You are a helpful but terse assistant.";
-const DEFAULT_USER_PROMPT = `Please generate a succinct label that effectively encapsulates the overall theme or purpose for the following list of items:`;
-const DEFAULT_PROMPT_TEMPLATE = (promptSystem, promptUser, items) => `<|system|>
+
+const DEFAULT_USER_PROMPT = `
+Please generate a succinct label that effectively encapsulates the overall theme or purpose for the following list of items:
+
+{{{items}}}
+`.trim();
+
+const DEFAULT_PROMPT_TEMPLATE = (promptSystem, promptUser, items) =>
+  `<|system|>
 ${promptSystem}</s>
 <|user|>
 ${promptUser}
-
-${items.map((item) => `- ${item}`).join("\n")}
 </s>
-<|assistant|>`;
+<|assistant|>`.replace(
+    "{{{items}}}",
+    items.map((item) => `- ${item}`).join("\n")
+  );
 
 export class StickyNotesApp extends LitElement {
   static styles = css`
@@ -47,18 +56,6 @@ export class StickyNotesApp extends LitElement {
     };
   }
 
-  prompt(items) {
-    return this.promptTemplate(this.promptSystem, this.promptUser, items);
-  }
-
-  get canvas() {
-    return this.shadowRoot.querySelector("sticky-notes-canvas");
-  }
-
-  connectedCallback() {
-    super.connectedCallback();
-  }
-
   render() {
     return html`
       <sticky-notes-canvas
@@ -75,6 +72,14 @@ export class StickyNotesApp extends LitElement {
         @add-note=${this.onAddNote}
       ></sticky-notes-tweak-pane>
     `;
+  }
+
+  prompt(items) {
+    return this.promptTemplate(this.promptSystem, this.promptUser, items);
+  }
+
+  get canvas() {
+    return this.shadowRoot.querySelector("sticky-notes-canvas");
   }
 
   async onDeleteNote() {
