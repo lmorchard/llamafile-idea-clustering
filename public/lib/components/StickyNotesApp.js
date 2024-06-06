@@ -1,7 +1,7 @@
 import { LitElement, html, css } from "../vendor/lit-all.min.js";
 import { $, $$, updateElement, createElement } from "../dom.js";
 import { items } from "../../items.js";
-import { colors } from "../colors.js";
+import { colors, randomColor } from "../colors.js";
 import { llamafile } from "../llamafile.js";
 import "../vendor/skmeans.js";
 
@@ -87,7 +87,14 @@ export class StickyNotesApp extends LitElement {
     selected.parentElement.removeChild(selected);
   }
 
-  async onAddNote() {}
+  async onAddNote() {
+    const now = Date.now();
+    const rand = Math.floor(Math.random() * 1000);
+    const id = `item-${now}-${rand}`;
+    const color = randomColor();
+
+    this.insertNote(id, `New note ${rand}`, color);
+  }
 
   async onDemoNotes() {
     const now = Date.now();
@@ -96,17 +103,20 @@ export class StickyNotesApp extends LitElement {
       item,
     }));
     for (const item of itemsWithIds) {
-      const color = colors[Math.floor(Math.random() * colors.length)].rgb;
-      this.canvas.appendChild(
-        createElement("sticky-note", {
-          id: item.id,
-          x: Math.random() * 200 - 100,
-          y: Math.random() * 200 - 100,
-          color,
-          ".innerHTML": `${item.item.substring(2)}`,
-        })
-      );
+      this.insertNote(item.id, item.item.substring(2), randomColor());
     }
+  }
+
+  async insertNote(id, text, color) {
+    this.canvas.appendChild(
+      createElement("sticky-note", {
+        id,
+        x: Math.random() * 200 - 100,
+        y: Math.random() * 200 - 100,
+        color,
+        ".innerHTML": `${text}`,
+      })
+    );
   }
 
   async onReset() {
