@@ -8,7 +8,7 @@
     "start:unix:ui-dev": "nodemon --ignore public/ ./server.js",
     "start:unix:llamafile": "./TinyLlama-1.1B-Chat-v1.0.Q4_0.llamafile -ngl 9999 --embedding --server --nobrowser --port 8887",
     "setup": "npm-run-all setup:unix:*",
-    "setup:unix:llamafile": "curl --no-clobber -LO https://huggingface.co/jartine/TinyLlama-1.1B-Chat-v1.0-GGUF/resolve/main/TinyLlama-1.1B-Chat-v1.0.Q4_0.llamafile?download=true",
+    "setup:unix:llamafile": "curl --no-clobber -LO https://huggingface.co/jartine/TinyLlama-1.1B-Chat-v1.0-GGUF/resolve/main/TinyLlama-1.1B-Chat-v1.0.Q4_0.llamafile?download=true && chmod +x ./TinyLlama-1.1B-Chat-v1.0.Q4_0.llamafile",
     "start:windows": "npm-run-all --parallel start:windows:*",
     "start:windows:ui-dev": "nodemon --ignore public/ ./server.js",
     "start:windows:llamafile": "TinyLlama-1.1B-Chat-v1.0.Q4_0.llamafile.exe -ngl 9999 --embedding --server --nobrowser --port 8887",

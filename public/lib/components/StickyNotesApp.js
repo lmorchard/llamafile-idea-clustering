@@ -1,7 +1,7 @@
 import { LitElement, html, css } from "../vendor/lit-all.min.js";
-import { $, $$, updateElement, createElement } from "../dom.js";
+import { createElement } from "../dom.js";
 import { items } from "../../items.js";
-import { colors, randomColor } from "../colors.js";
+import { randomColor } from "../colors.js";
 import { llamafile } from "../llamafile.js";
 import "../vendor/skmeans.js";
 
@@ -41,6 +41,7 @@ export class StickyNotesApp extends LitElement {
     this.promptTemplate = DEFAULT_PROMPT_TEMPLATE;
     this.promptSystem = DEFAULT_SYSTEM_PROMPT;
     this.promptUser = DEFAULT_USER_PROMPT;
+
     this.llmParameters = {
       temperature: 0.1,
       top_k: 40,
@@ -50,6 +51,7 @@ export class StickyNotesApp extends LitElement {
       n_keep: 0,
       seed: -1,
     };
+
     this.uiOptions = {
       numClusters: DEFAULT_NUM_CLUSTERS,
       clusterLayoutRadius: DEFAULT_CLUSTER_LAYOUT_RADIUS,
@@ -63,14 +65,14 @@ export class StickyNotesApp extends LitElement {
         originx="0"
         originy="0"
       ></sticky-notes-canvas>
-      <sticky-notes-tweak-pane
+      <sticky-notes-app-controls
         @demo-notes=${this.onAddDemoNotes}
         @clear-notes=${this.onClearNotes}
         @organize-notes=${this.onOrganize}
         @reset-topics=${this.onReset}
         @delete-note=${this.onDeleteNote}
         @add-note=${this.onAddNote}
-      ></sticky-notes-tweak-pane>
+      ></sticky-notes-app-controls>
     `;
   }
 

@@ -1,4 +1,4 @@
-import Springy from "../springy.js";
+import Springy from "../vendor/springy.js";
 import {
   StickyNotesClusterTopic,
   StickyNotesClusterLink,

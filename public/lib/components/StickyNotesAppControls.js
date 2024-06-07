@@ -2,7 +2,7 @@ import { LitElement, html, css } from "../vendor/lit-all.min.js";
 import { Pane } from "../vendor/tweakpane.min.js";
 import { ConfirmDialog } from "./ConfirmDialog.js";
 
-export class StickyNotesTweakPane extends LitElement {
+export class StickyNotesAppControls extends LitElement {
   render() {
     return html`
       <sticky-notes-prompt-editor></sticky-notes-prompt-editor>
@@ -48,10 +48,10 @@ export class StickyNotesTweakPane extends LitElement {
       { title: "Organize notes", event: "organize-notes" },
       { title: "Reset topics", event: "reset-topics" },
       { separator: true },
-      { title: "Import / export text notes", handler: this.openImportExportDialog },
-      { separator: true },
       { title: "Delete selected note", event: "delete-note" },
       { title: "Add new note", event: "add-note" },
+      { separator: true },
+      { title: "Import / export text notes", handler: this.openImportExportDialog },
     ].map(buttonFactory(actionsSection));
 
     const llmParameters = this.app.llmParameters;
@@ -128,7 +128,7 @@ export class StickyNotesTweakPane extends LitElement {
   }
 }
 
-customElements.define("sticky-notes-tweak-pane", StickyNotesTweakPane);
+customElements.define("sticky-notes-app-controls", StickyNotesAppControls);
 
 export class StickyNotesPromptEditor extends ConfirmDialog {
   render() {
