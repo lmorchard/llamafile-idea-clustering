@@ -22,10 +22,11 @@ export class StickyNotesAppControls extends LitElement {
   setupTweakPane() {
     this.pane = new Pane();
 
-    const [actionsSection, parametersSection, optionsSection] = [
+    const [actionsSection, optionsSection, parametersSection, aboutSection] = [
       { title: "Actions" },
-      { title: "LLM Parameters" },
       { title: "UI Options" },
+      { title: "LLM Parameters" },
+      { title: "About" },
     ].map((section) => this.pane.addFolder(section));
 
     const buttonFactory = (section) => (buttonDfn) => {
@@ -42,17 +43,24 @@ export class StickyNotesAppControls extends LitElement {
     };
 
     [
-      { title: "Add demo notes", event: "demo-notes" },
-      { title: "Delete all notes", event: "clear-notes" },
-      { separator: true },
       { title: "Organize notes", event: "organize-notes" },
-      { title: "Reset topics", event: "reset-topics" },
+      { separator: true },
+      { title: "Add new note", event: "add-note" },
+      { title: "Add demo notes", event: "demo-notes" },
+      {
+        title: "Import / export text notes",
+        handler: this.openImportExportDialog,
+      },
       { separator: true },
       { title: "Delete selected note", event: "delete-note" },
-      { title: "Add new note", event: "add-note" },
-      { separator: true },
-      { title: "Import / export text notes", handler: this.openImportExportDialog },
+      { title: "Delete topics", event: "reset-topics" },
+      { title: "Delete all notes", event: "clear-notes" },
     ].map(buttonFactory(actionsSection));
+
+    parametersSection.addBinding(this.app, "model", {
+      readonly: true,
+      interval: 1000,
+    });
 
     const llmParameters = this.app.llmParameters;
     const llmParameterBindings = [
@@ -86,7 +94,15 @@ export class StickyNotesAppControls extends LitElement {
       },
     ].map(buttonFactory(parametersSection));
 
+    const zoomSlider = optionsSection.addBinding(this.app.canvas, "zoom", {
+      min: 0.1,
+      max: 2,
+      step: 0.1,
+      interval: 0.1,
+    });
+
     const uiOptions = this.app.uiOptions;
+
     const upOptionBindings = [
       { key: "numClusters", min: 3, max: 20, step: 1 },
       { key: "clusterLayoutRadius", min: 50, max: 5000, step: 100 },
@@ -99,16 +115,18 @@ export class StickyNotesAppControls extends LitElement {
       return binding;
     });
 
-    const zoomSlider = optionsSection.addBinding(this.app.canvas, "zoom", {
-      min: 0.1,
-      max: 2,
-      step: 0.1,
-      interval: 0.1,
+    aboutSection.addBinding(this.app.appMeta, "about", {
+      readonly: true,
+      interval: 1000,
+      multiline: true,
+      rows: 5
     });
   }
 
   openPromptEditor() {
-    const promptEditor = this.shadowRoot.querySelector("sticky-notes-prompt-editor");
+    const promptEditor = this.shadowRoot.querySelector(
+      "sticky-notes-prompt-editor"
+    );
     promptEditor.open(
       this.app.promptSystem,
       this.app.promptUser,
@@ -120,10 +138,11 @@ export class StickyNotesAppControls extends LitElement {
   }
 
   openImportExportDialog() {
-    const importExportDialog = this.shadowRoot.querySelector("sticky-notes-import-export-dialog");
-    importExportDialog.open(
-      this.app.notesToText(),
-      (notesText) => this.app.notesFromText(notesText),
+    const importExportDialog = this.shadowRoot.querySelector(
+      "sticky-notes-import-export-dialog"
+    );
+    importExportDialog.open(this.app.notesToText(), (notesText) =>
+      this.app.notesFromText(notesText)
     );
   }
 }
@@ -187,4 +206,7 @@ export class StickyNotesImportExportDialog extends ConfirmDialog {
   }
 }
 
-customElements.define("sticky-notes-import-export-dialog", StickyNotesImportExportDialog);
+customElements.define(
+  "sticky-notes-import-export-dialog",
+  StickyNotesImportExportDialog
+);

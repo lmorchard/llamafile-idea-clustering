@@ -2,8 +2,19 @@ import { LitElement, html, css } from "../vendor/lit-all.min.js";
 import { createElement } from "../dom.js";
 import { items } from "../../items.js";
 import { randomColor } from "../colors.js";
-import { llamafile } from "../llamafile.js";
+import { llamafile, llamafileGET } from "../llamafile.js";
 import "../vendor/skmeans.js";
+
+const ABOUT_TEXT = `
+Notes clustering toy
+for Llamafile
+
+me@lmorchard.com
+`.trim();
+
+const APP_META = {
+  about: ABOUT_TEXT,
+};
 
 const DEFAULT_CLUSTER_LAYOUT_RADIUS = 1200;
 const DEFAULT_NUM_CLUSTERS = 10;
@@ -38,6 +49,8 @@ export class StickyNotesApp extends LitElement {
   constructor() {
     super();
 
+    this.appMeta = APP_META;
+
     this.promptTemplate = DEFAULT_PROMPT_TEMPLATE;
     this.promptSystem = DEFAULT_SYSTEM_PROMPT;
     this.promptUser = DEFAULT_USER_PROMPT;
@@ -56,6 +69,18 @@ export class StickyNotesApp extends LitElement {
       numClusters: DEFAULT_NUM_CLUSTERS,
       clusterLayoutRadius: DEFAULT_CLUSTER_LAYOUT_RADIUS,
     };
+
+    this.llmProps = {};
+  }
+
+  async connectedCallback() {
+    super.connectedCallback();
+
+    this.llmProps = await llamafileGET("props");
+  }
+
+  get model() {
+    return this.llmProps.default_generation_settings?.model || "";
   }
 
   render() {
