@@ -21,8 +21,8 @@ export class StickyNotesTweakPane extends LitElement {
 
     const [actionsSection, parametersSection, optionsSection] = [
       { title: "Actions" },
-      { title: "LLM Parameters", expanded: false },
-      { title: "UI Options", expanded: false },
+      { title: "LLM Parameters" },
+      { title: "UI Options" },
     ].map((section) => this.pane.addFolder(section));
 
     const buttonFactory = (section) => (buttonDfn) => {
@@ -169,7 +169,7 @@ export class StickyNotesImportExportDialog extends ConfirmDialog {
 
   renderActions() {
     return html`
-      <button @click=${this.onConfirm}>Commit</button>
+      <button @click=${this.onConfirm}>Import</button>
       <button @click=${this.onCancel}>Close</button>
     `;
   }

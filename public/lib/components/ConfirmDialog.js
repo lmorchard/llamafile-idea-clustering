@@ -12,6 +12,7 @@ export class ConfirmDialog extends LitElement {
     }
     dialog textarea {
       width: 100%;
+      display: block;
     }
     dialog .actions {
       margin-top: 1em;
@@ -66,7 +67,7 @@ export class ConfirmDialog extends LitElement {
     return true;
   }
 
-  onConfirm(result) {
+  onConfirm() {
     this.dialog.close(true);
   }
 
