@@ -16,7 +16,10 @@ export class StickyNotesTweakPane extends LitElement {
 
   firstUpdated() {
     super.firstUpdated();
+    this.setupTweakPane();
+  }
 
+  setupTweakPane() {
     this.pane = new Pane();
 
     const [actionsSection, parametersSection, optionsSection] = [
