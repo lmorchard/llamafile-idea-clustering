@@ -255,15 +255,15 @@ export class StickyNotesApp extends LitElement {
   }
 
   async notesFromText(notesText) {
-    const lines = notesText.split("\n");
+    const lines = notesText.split(/\n/);
 
     const notesById = {};
     const topicsById = {};
 
     let currentTopic = null;
 
-    const genId = (prefix) =>
-      `${prefix}-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+    let lastId = 0;
+    const genId = (prefix) => `${prefix}-${Date.now()}-${lastId++}`;
 
     for (const line of lines) {
       if (line.startsWith("# ")) {

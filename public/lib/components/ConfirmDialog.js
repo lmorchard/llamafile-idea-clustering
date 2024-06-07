@@ -51,9 +51,10 @@ export class ConfirmDialog extends LitElement {
 
   open(onConfirm, onCancel) {
     const dialog = this.dialog;
+    dialog.returnValue = "";
     const closeHandler = (ev) => {
       dialog.removeEventListener("close", closeHandler);
-      if (dialog.returnValue) {
+      if (dialog.returnValue !== "") {
         if (onConfirm) onConfirm(this.returnValue);
       } else {
         if (onCancel) onCancel();
@@ -68,7 +69,7 @@ export class ConfirmDialog extends LitElement {
   }
 
   onConfirm() {
-    this.dialog.close(true);
+    this.dialog.close("true");
   }
 
   onCancel() {
