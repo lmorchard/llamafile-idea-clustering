@@ -4,26 +4,14 @@ import { ConfirmDialog } from "./ConfirmDialog.js";
 
 export class StickyNotesTweakPane extends LitElement {
   render() {
-    return html` <sticky-notes-prompt-editor></sticky-notes-prompt-editor> `;
+    return html`
+      <sticky-notes-prompt-editor></sticky-notes-prompt-editor>
+      <sticky-notes-import-export-dialog></sticky-notes-import-export-dialog>
+    `;
   }
 
   get app() {
     return this.getRootNode().host;
-  }
-
-  get promptEditor() {
-    return this.shadowRoot.querySelector("sticky-notes-prompt-editor");
-  }
-
-  openPromptEditor() {
-    this.promptEditor.open(
-      this.app.promptSystem,
-      this.app.promptUser,
-      ([promptSystem, promptUser]) => {
-        this.app.promptSystem = promptSystem;
-        this.app.promptUser = promptUser;
-      }
-    );
   }
 
   firstUpdated() {
@@ -33,8 +21,8 @@ export class StickyNotesTweakPane extends LitElement {
 
     const [actionsSection, parametersSection, optionsSection] = [
       { title: "Actions" },
-      { title: "LLM Parameters" },
-      { title: "UI Options" },
+      { title: "LLM Parameters", expanded: false },
+      { title: "UI Options", expanded: false },
     ].map((section) => this.pane.addFolder(section));
 
     const buttonFactory = (section) => (buttonDfn) => {
@@ -56,6 +44,8 @@ export class StickyNotesTweakPane extends LitElement {
       { separator: true },
       { title: "Organize notes", event: "organize-notes" },
       { title: "Reset topics", event: "reset-topics" },
+      { separator: true },
+      { title: "Import / export text notes", handler: this.openImportExportDialog },
       { separator: true },
       { title: "Delete selected note", event: "delete-note" },
       { title: "Add new note", event: "add-note" },
@@ -113,6 +103,26 @@ export class StickyNotesTweakPane extends LitElement {
       interval: 0.1,
     });
   }
+
+  openPromptEditor() {
+    const promptEditor = this.shadowRoot.querySelector("sticky-notes-prompt-editor");
+    promptEditor.open(
+      this.app.promptSystem,
+      this.app.promptUser,
+      ([promptSystem, promptUser]) => {
+        this.app.promptSystem = promptSystem;
+        this.app.promptUser = promptUser;
+      }
+    );
+  }
+
+  openImportExportDialog() {
+    const importExportDialog = this.shadowRoot.querySelector("sticky-notes-import-export-dialog");
+    importExportDialog.open(
+      this.app.notesToText(),
+      (notesText) => this.app.notesFromText(notesText),
+    );
+  }
 }
 
 customElements.define("sticky-notes-tweak-pane", StickyNotesTweakPane);
@@ -146,3 +156,32 @@ export class StickyNotesPromptEditor extends ConfirmDialog {
 }
 
 customElements.define("sticky-notes-prompt-editor", StickyNotesPromptEditor);
+
+export class StickyNotesImportExportDialog extends ConfirmDialog {
+  render() {
+    return super.render(html`
+      <label>
+        Notes
+        <textarea class="notes" rows="30" autofocus></textarea>
+      </label>
+    `);
+  }
+
+  renderActions() {
+    return html`
+      <button @click=${this.onConfirm}>Commit</button>
+      <button @click=${this.onCancel}>Close</button>
+    `;
+  }
+
+  open(notesText, onConfirm, onCancel) {
+    this.dialog.querySelector("textarea.notes").value = notesText;
+    super.open(onConfirm, onCancel);
+  }
+
+  get returnValue() {
+    return this.dialog.querySelector("textarea.notes").value;
+  }
+}
+
+customElements.define("sticky-notes-import-export-dialog", StickyNotesImportExportDialog);

@@ -4,7 +4,7 @@ export class ConfirmDialog extends LitElement {
   static styles = css`
     dialog {
       padding: 1em;
-      width: 40vw;
+      width: 50vw;
     }
     dialog label {
       display: block;
@@ -31,19 +31,21 @@ export class ConfirmDialog extends LitElement {
       <dialog @click=${this.onClickDialog}>
         ${children}
         <div class="actions">
-          <button @click=${this.onConfirm}>Ok</button>
-          <button @click=${this.onCancel}>Cancel</button>
+          ${this.renderActions()}
         </div>
       </dialog>
     `;
   }
 
-  get dialog() {
-    return this.shadowRoot.querySelector("dialog");
+  renderActions() {
+    return html`
+      <button @click=${this.onConfirm}>Ok</button>
+      <button @click=${this.onCancel}>Cancel</button>
+    `;
   }
 
-  onClickDialog(ev) {
-    if (ev.target === this.promptEditor) this.cancelPromptEditor();
+  get dialog() {
+    return this.shadowRoot.querySelector("dialog");
   }
 
   open(onConfirm, onCancel) {
@@ -70,5 +72,9 @@ export class ConfirmDialog extends LitElement {
 
   onCancel() {
     this.dialog.close();
+  }
+
+  onClickDialog(ev) {
+    if (ev.target === this.dialog) this.onCancel();
   }
 }

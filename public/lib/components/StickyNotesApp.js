@@ -64,7 +64,7 @@ export class StickyNotesApp extends LitElement {
         originy="0"
       ></sticky-notes-canvas>
       <sticky-notes-tweak-pane
-        @demo-notes=${this.onDemoNotes}
+        @demo-notes=${this.onAddDemoNotes}
         @clear-notes=${this.onClearNotes}
         @organize-notes=${this.onOrganize}
         @reset-topics=${this.onReset}
@@ -101,7 +101,7 @@ export class StickyNotesApp extends LitElement {
     this.insertNote(id, `New note ${rand}`, color);
   }
 
-  async onDemoNotes() {
+  async onAddDemoNotes() {
     const now = Date.now();
     const itemsWithIds = items.map((item, idx) => ({
       id: `item-${now}-${idx}`,
@@ -215,6 +215,104 @@ export class StickyNotesApp extends LitElement {
         ),
       });
       this.canvas.appendChild(clusterGroupEl);
+    }
+  }
+
+  notesToText() {
+    const notesById = {};
+    for (const notes of this.canvas.querySelectorAll("sticky-note")) {
+      notesById[notes.id] = notes.innerText;
+    }
+
+    const topicsById = {};
+    for (const topic of this.canvas.querySelectorAll(
+      "sticky-notes-cluster-topic"
+    )) {
+      topicsById[topic.id] = {
+        title: topic.title,
+        children: [],
+      };
+      for (const link of topic.querySelectorAll("sticky-notes-cluster-link")) {
+        const href = link.getAttribute("href");
+        const note = notesById[href];
+        if (note) {
+          topicsById[topic.id].children.push(note);
+          delete notesById[href];
+        }
+      }
+    }
+
+    return [
+      ...Object.values(notesById).map((note) => `- ${note}`),
+      ...Object.values(topicsById)
+        .map((topic) => [
+          `# ${topic.title}`,
+          ...topic.children.map((note) => `- ${note}`),
+          "",
+        ])
+        .flat(),
+    ].join("\n");
+  }
+
+  async notesFromText(notesText) {
+    const lines = notesText.split("\n");
+
+    const notesById = {};
+    const topicsById = {};
+
+    let currentTopic = null;
+
+    const genId = (prefix) =>
+      `${prefix}-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+
+    for (const line of lines) {
+      if (line.startsWith("# ")) {
+        const id = genId("topic");
+        topicsById[id] = currentTopic = {
+          id,
+          title: line.substring(2),
+          children: [],
+        };
+      } else if (line.startsWith("- ")) {
+        const id = genId("item");
+        const text = line.substring(2);
+        notesById[id] = { id, text };
+        if (currentTopic) {
+          currentTopic.children.push(id);
+        }
+      }
+    }
+
+    await this.clearNotes();
+
+    for (const note of Object.values(notesById)) {
+      this.insertNote(note.id, note.text, randomColor());
+    }
+
+    const topics = Object.values(topicsById);
+    for (let topicIdx = 0; topicIdx < topics.length; topicIdx++) {
+      const topic = topics[topicIdx];
+      const clusterAngle = (topicIdx / topics.length) * Math.PI * 2;
+      const clusterX =
+        Math.cos(clusterAngle) * this.uiOptions.clusterLayoutRadius;
+      const clusterY =
+        Math.sin(clusterAngle) * (this.uiOptions.clusterLayoutRadius / 2);
+
+      const topicEl = createElement("sticky-notes-cluster-topic", {
+        id: topic.id,
+        x: clusterX,
+        y: clusterY,
+        width: 350,
+        height: 200,
+        title: `${topic.title.trim()}`,
+        color: `#eee`,
+        children: topic.children.map((itemId) =>
+          createElement("sticky-notes-cluster-link", {
+            href: `${itemId}`,
+          })
+        ),
+      });
+      this.canvas.appendChild(topicEl);
     }
   }
 }
