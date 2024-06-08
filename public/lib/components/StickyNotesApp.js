@@ -6,10 +6,10 @@ import { llamafile, llamafileGET } from "../llamafile.js";
 import "../vendor/skmeans.js";
 
 const ABOUT_TEXT = `
-Notes clustering toy
-for Llamafile
+Topic clustering
+with Llamafile
 
-me@lmorchard.com
+by me@lmorchard.com
 `.trim();
 
 const APP_META = {

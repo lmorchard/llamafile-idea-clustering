@@ -7,6 +7,7 @@ export class StickyNotesAppControls extends LitElement {
     return html`
       <sticky-notes-prompt-editor></sticky-notes-prompt-editor>
       <sticky-notes-import-export-dialog></sticky-notes-import-export-dialog>
+      <sticky-notes-about-dialog></sticky-notes-about-dialog>
     `;
   }
 
@@ -48,7 +49,7 @@ export class StickyNotesAppControls extends LitElement {
       { title: "Add new note", event: "add-note" },
       { title: "Add demo notes", event: "demo-notes" },
       {
-        title: "Import / export text notes",
+        title: "Import / export text notes...",
         handler: this.openImportExportDialog,
       },
       { separator: true },
@@ -88,7 +89,7 @@ export class StickyNotesAppControls extends LitElement {
 
     [
       {
-        title: "Edit LLM prompt",
+        title: "Edit LLM prompt...",
         event: "edit-prompt",
         handler: this.openPromptEditor,
       },
@@ -119,8 +120,16 @@ export class StickyNotesAppControls extends LitElement {
       readonly: true,
       interval: 1000,
       multiline: true,
-      rows: 5
+      rows: 4
     });
+
+    [
+      {
+        title: "More info...",
+        handler: this.openAboutDialog,
+      },
+    ].map(buttonFactory(aboutSection));
+
   }
 
   openPromptEditor() {
@@ -144,6 +153,11 @@ export class StickyNotesAppControls extends LitElement {
     importExportDialog.open(this.app.notesToText(), (notesText) =>
       this.app.notesFromText(notesText)
     );
+  }
+
+  openAboutDialog() {
+    const aboutDialog = this.shadowRoot.querySelector("sticky-notes-about-dialog");
+    aboutDialog.open();
   }
 }
 
@@ -209,4 +223,23 @@ export class StickyNotesImportExportDialog extends ConfirmDialog {
 customElements.define(
   "sticky-notes-import-export-dialog",
   StickyNotesImportExportDialog
+);
+
+export class StickyNotesAboutDialog extends ConfirmDialog {
+  render() {
+    return super.render(html`
+      Hello there, this is good app.
+    `);
+  }
+
+  renderActions() {
+    return html`
+      <button @click=${this.onCancel}>Close</button>
+    `;
+  }
+}
+
+customElements.define(
+  "sticky-notes-about-dialog",
+  StickyNotesAboutDialog
 );
