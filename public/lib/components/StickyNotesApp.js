@@ -1,6 +1,6 @@
 import { LitElement, html, css } from "../vendor/lit-all.min.js";
 import { createElement } from "../dom.js";
-import { items } from "../../items.js";
+import { items } from "../items.js";
 import { randomColor } from "../colors.js";
 import { llamafile, llamafileGET } from "../llamafile.js";
 import "../vendor/skmeans.js";
@@ -17,22 +17,23 @@ const APP_META = {
 };
 
 const DEFAULT_CLUSTER_LAYOUT_RADIUS = 1200;
-const DEFAULT_NUM_CLUSTERS = 10;
+const DEFAULT_NUM_CLUSTERS = 12;
 
 const DEFAULT_SYSTEM_PROMPT = "You are a helpful but terse assistant.";
 
-const DEFAULT_USER_PROMPT = `
-Please generate a succinct label that effectively encapsulates the overall theme or purpose for the following list of items:
+const DEFAULT_USER_PROMPT = `Given the following list of items, I need a succinct label that effectively describes the overall topic.
+
+This is the list of items:
 
 {{{items}}}
-`.trim();
+
+Can you generate a concise, descriptive label for this list? Thanks in advance!`;
 
 const DEFAULT_PROMPT_TEMPLATE = (promptSystem, promptUser, items) =>
   `<|system|>
 ${promptSystem}</s>
 <|user|>
-${promptUser}
-</s>
+${promptUser}</s>
 <|assistant|>`.replace(
     "{{{items}}}",
     items.map((item) => `- ${item}`).join("\n")
@@ -56,13 +57,10 @@ export class StickyNotesApp extends LitElement {
     this.promptUser = DEFAULT_USER_PROMPT;
 
     this.llmParameters = {
+      n_predict: 32,
       temperature: 0.1,
-      top_k: 40,
-      top_p: 0.95,
-      min_p: 0.05,
-      n_predict: 16,
-      n_keep: 0,
-      seed: -1,
+      top_k: 3,
+      top_p: 0.8,
     };
 
     this.uiOptions = {
@@ -206,42 +204,24 @@ export class StickyNotesApp extends LitElement {
         .filter((x) => !!x)
     );
 
-    for (let i = 0; i < clusters.length; i++) {
-      const cluster = clusters[i];
+    for (let clusterIdx = 0; clusterIdx < clusters.length; clusterIdx++) {
+      const cluster = clusters[clusterIdx];
       const prompt = this.prompt(cluster.map((item) => item.item));
       const result = await llamafile("completion", {
         prompt,
         ...this.llmParameters,
       });
 
-      const clusterAngle = (i / clusters.length) * Math.PI * 2;
-      const clusterX =
-        Math.cos(clusterAngle) * this.uiOptions.clusterLayoutRadius;
-      const clusterY =
-        Math.sin(clusterAngle) * (this.uiOptions.clusterLayoutRadius / 2);
+      // HACK: do some cleanup on the result for common unwanted artifacts
+      const content = result.content.trim().replace("</s>", "");
 
-      for (const item of cluster) {
-        const linkEl = document.querySelector(
-          `sticky-notes-cluster-link[href="${item.id}"]`
-        );
-        if (linkEl) linkEl.parentElement.removeChild(linkEl);
-      }
-
-      const clusterGroupEl = createElement("sticky-notes-cluster-topic", {
-        id: `cluster-${i}`,
-        x: clusterX,
-        y: clusterY,
-        width: 350,
-        height: 200,
-        title: `${result.content.trim()}`,
-        color: `#eee`,
-        children: cluster.map((item) =>
-          createElement("sticky-notes-cluster-link", {
-            href: `${item.id}`,
-          })
-        ),
-      });
-      this.canvas.appendChild(clusterGroupEl);
+      this.addClusterTopic(
+        `cluster-${clusterIdx}`,
+        clusterIdx,
+        clusters.length,
+        cluster,
+        content,
+      );
     }
   }
 
@@ -305,7 +285,7 @@ export class StickyNotesApp extends LitElement {
         const text = line.substring(2);
         notesById[id] = { id, text };
         if (currentTopic) {
-          currentTopic.children.push(id);
+          currentTopic.children.push({ id });
         }
       }
     }
@@ -319,28 +299,45 @@ export class StickyNotesApp extends LitElement {
     const topics = Object.values(topicsById);
     for (let topicIdx = 0; topicIdx < topics.length; topicIdx++) {
       const topic = topics[topicIdx];
-      const clusterAngle = (topicIdx / topics.length) * Math.PI * 2;
-      const clusterX =
-        Math.cos(clusterAngle) * this.uiOptions.clusterLayoutRadius;
-      const clusterY =
-        Math.sin(clusterAngle) * (this.uiOptions.clusterLayoutRadius / 2);
-
-      const topicEl = createElement("sticky-notes-cluster-topic", {
-        id: topic.id,
-        x: clusterX,
-        y: clusterY,
-        width: 350,
-        height: 200,
-        title: `${topic.title.trim()}`,
-        color: `#eee`,
-        children: topic.children.map((itemId) =>
-          createElement("sticky-notes-cluster-link", {
-            href: `${itemId}`,
-          })
-        ),
-      });
-      this.canvas.appendChild(topicEl);
+      this.addClusterTopic(
+        topic.id,
+        topicIdx,
+        topics.length,
+        topic.children,
+        topic.title.trim()
+      );
     }
+  }
+
+  addClusterTopic(clusterId, clusterIndex, clustersCount, cluster, title) {
+    const clusterAngle = (clusterIndex / clustersCount) * Math.PI * 2;
+    const clusterX =
+      Math.cos(clusterAngle) * this.uiOptions.clusterLayoutRadius;
+    const clusterY =
+      Math.sin(clusterAngle) * (this.uiOptions.clusterLayoutRadius / 2);
+
+    for (const item of cluster) {
+      const linkEl = document.querySelector(
+        `sticky-notes-cluster-link[href="${item.id}"]`
+      );
+      if (linkEl) linkEl.parentElement.removeChild(linkEl);
+    }
+
+    const clusterGroupEl = createElement("sticky-notes-cluster-topic", {
+      id: clusterId,
+      x: clusterX,
+      y: clusterY,
+      width: 350,
+      height: 200,
+      title: `${title}`,
+      color: `#eee`,
+      children: cluster.map((item) =>
+        createElement("sticky-notes-cluster-link", {
+          href: `${item.id}`,
+        })
+      ),
+    });
+    this.canvas.appendChild(clusterGroupEl);
   }
 }
 

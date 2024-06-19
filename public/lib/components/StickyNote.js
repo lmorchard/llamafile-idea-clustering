@@ -8,13 +8,6 @@ export class StickyNote extends BaseElement {
     contentEditable: { type: String, reflect: true },
   };
 
-  /*
-  static shadowRootOptions = {
-    ...LitElement.shadowRootOptions,
-    delegatesFocus: true,
-  };
-  */
-
   static styles = [
     BaseElement.styles,
     css`

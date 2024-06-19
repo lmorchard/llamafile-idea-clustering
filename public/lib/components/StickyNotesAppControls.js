@@ -68,10 +68,7 @@ export class StickyNotesAppControls extends LitElement {
       { key: "temperature", min: 0, max: 1, step: 0.01 },
       { key: "top_k", min: 1, max: 100, step: 1 },
       { key: "top_p", min: 0, max: 1, step: 0.01 },
-      { key: "min_p", min: 0, max: 1, step: 0.01 },
       { key: "n_predict", min: 1, max: 100, step: 1 },
-      { key: "n_keep", min: 0, max: 100, step: 1 },
-      { key: "seed", min: -1, max: 100, step: 1 },
     ].map((bindingDefn) => {
       const binding = parametersSection.addBinding(
         llmParameters,
